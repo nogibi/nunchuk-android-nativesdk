@@ -26,6 +26,7 @@ add_library(nunchuk-android SHARED
         sync-jni.cpp
         tap-protocol-jni.cpp
         satscard-jni.cpp
+        satochip-jni.cpp
         mk4.cpp
         string-wrapper.h
         group-wallet-jni.cpp

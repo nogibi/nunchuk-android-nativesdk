@@ -88,6 +88,9 @@ SignerType Serializer::convert2CSignerType(JNIEnv *env, jobject singerType) {
         case 9:
             type = SignerType::PLATFORM;
             break;
+        case 10:
+            type = SignerType::SATOCHIP_NFC;
+            break;
         default:
             type = SignerType::UNKNOWN;
             break;

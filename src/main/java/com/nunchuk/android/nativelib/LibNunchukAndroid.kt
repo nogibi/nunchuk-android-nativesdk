@@ -21,6 +21,7 @@ package com.nunchuk.android.nativelib
 
 import android.nfc.NdefRecord
 import android.nfc.tech.IsoDep
+import com.nunchuk.android.callbacks.SatochipCardCallback
 import com.nunchuk.android.exception.NCNativeException
 import com.nunchuk.android.model.Amount
 import com.nunchuk.android.model.BSMSData
@@ -694,6 +695,20 @@ internal class LibNunchukAndroid {
 
     @Throws(NCNativeException::class)
     external fun getSigner(signer: SingleSigner): SingleSigner
+
+    @Throws(NCNativeException::class)
+    external fun getSatochipSigner(
+        callback: SatochipCardCallback,
+        path: String,
+    ): SingleSigner
+
+    @Throws(NCNativeException::class)
+    external fun signSatochipTransaction(
+        callback: SatochipCardCallback,
+        walletId: String,
+        txId: String,
+        challengeResponse: ByteArray?,
+    ): Transaction
 
     @Throws(NCNativeException::class)
     external fun getSatsCardStatus(

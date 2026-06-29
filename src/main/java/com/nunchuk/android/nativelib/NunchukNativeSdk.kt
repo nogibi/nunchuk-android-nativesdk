@@ -21,6 +21,7 @@ package com.nunchuk.android.nativelib
 
 import android.nfc.NdefRecord
 import android.nfc.tech.IsoDep
+import com.nunchuk.android.callbacks.SatochipCardCallback
 import com.nunchuk.android.exception.NCNativeException
 import com.nunchuk.android.model.Amount
 import com.nunchuk.android.model.AppSettings
@@ -907,6 +908,20 @@ class NunchukNativeSdk {
 
     @Throws(NCNativeException::class)
     fun getSigner(signer: SingleSigner) = nunchukAndroid.getSigner(signer)
+
+    @Throws(NCNativeException::class)
+    fun getSatochipSigner(
+        callback: SatochipCardCallback,
+        path: String,
+    ) = nunchukAndroid.getSatochipSigner(callback, path)
+
+    @Throws(NCNativeException::class)
+    fun signSatochipTransaction(
+        callback: SatochipCardCallback,
+        walletId: String,
+        txId: String,
+        challengeResponse: ByteArray? = null,
+    ) = nunchukAndroid.signSatochipTransaction(callback, walletId, txId, challengeResponse)
 
     @Throws(NCNativeException::class)
     fun getMatrixEvent(
