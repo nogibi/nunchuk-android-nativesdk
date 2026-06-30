@@ -328,6 +328,47 @@ private:
     jmethodID cardMusig2SignMethod_{};
 };
 
+SatochipSignPsbtParams BuildSatochipSignPsbtParams(
+        JNIEnv *env,
+        SatochipCallbackAdapter &adapter,
+        jbyteArray challenge_response
+) {
+    SatochipSignPsbtParams params;
+    params.chalresponse = ToOptionalBytes(env, challenge_response);
+    params.cardBip32GetExtendedKeyFn = [&](const std::string &path) {
+        return adapter.CardBip32GetExtendedKey(path);
+    };
+    params.cardSignTransactionHashFn = [&](unsigned char keyNumber,
+                                           const std::vector<unsigned char> &txHash,
+                                           const std::optional<std::vector<unsigned char>> &chalresponse) {
+        return adapter.CardSignTransactionHash(static_cast<int>(keyNumber), txHash, chalresponse);
+    };
+    params.cardTaprootTweakPrivateKeyFn = [&](int keyNumber,
+                                              const std::vector<unsigned char> &tweak,
+                                              bool bypassFlag) {
+        return adapter.CardTaprootTweakPrivateKey(keyNumber, tweak, bypassFlag);
+    };
+    params.cardSignSchnorrHashFn = [&](const std::vector<unsigned char> &txHash,
+                                       const std::optional<std::vector<unsigned char>> &chalresponse) {
+        return adapter.CardSignSchnorrHash(txHash, chalresponse);
+    };
+    params.cardMusig2GenerateNonceFn = [&](int keyNumber,
+                                           const std::vector<unsigned char> &aggregatePublicKey,
+                                           const std::vector<unsigned char> &message,
+                                           const std::vector<unsigned char> &extra) {
+        return adapter.CardMusig2GenerateNonce(keyNumber, aggregatePublicKey, message, extra);
+    };
+    params.cardMusig2SignFn = [&](int keyNumber,
+                                  const std::vector<unsigned char> &secNonce,
+                                  const std::vector<unsigned char> &b,
+                                  const std::vector<unsigned char> &ea,
+                                  bool rHasEvenY,
+                                  bool ggaccIsOne) {
+        return adapter.CardMusig2Sign(keyNumber, secNonce, b, ea, rHasEvenY, ggaccIsOne);
+    };
+    return params;
+}
+
 } // namespace
 
 extern "C"
@@ -368,40 +409,7 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_signSatochipTransaction(
 ) {
     try {
         SatochipCallbackAdapter adapter(env, callback);
-
-        SatochipSignPsbtParams params;
-        params.chalresponse = ToOptionalBytes(env, challenge_response);
-        params.cardBip32GetExtendedKeyFn = [&](const std::string &path) {
-            return adapter.CardBip32GetExtendedKey(path);
-        };
-        params.cardSignTransactionHashFn = [&](unsigned char keyNumber,
-                                               const std::vector<unsigned char> &txHash,
-                                               const std::optional<std::vector<unsigned char>> &chalresponse) {
-            return adapter.CardSignTransactionHash(static_cast<int>(keyNumber), txHash, chalresponse);
-        };
-        params.cardTaprootTweakPrivateKeyFn = [&](int keyNumber,
-                                                  const std::vector<unsigned char> &tweak,
-                                                  bool bypassFlag) {
-            return adapter.CardTaprootTweakPrivateKey(keyNumber, tweak, bypassFlag);
-        };
-        params.cardSignSchnorrHashFn = [&](const std::vector<unsigned char> &txHash,
-                                           const std::optional<std::vector<unsigned char>> &chalresponse) {
-            return adapter.CardSignSchnorrHash(txHash, chalresponse);
-        };
-        params.cardMusig2GenerateNonceFn = [&](int keyNumber,
-                                               const std::vector<unsigned char> &aggregatePublicKey,
-                                               const std::vector<unsigned char> &message,
-                                               const std::vector<unsigned char> &extra) {
-            return adapter.CardMusig2GenerateNonce(keyNumber, aggregatePublicKey, message, extra);
-        };
-        params.cardMusig2SignFn = [&](int keyNumber,
-                                      const std::vector<unsigned char> &secNonce,
-                                      const std::vector<unsigned char> &b,
-                                      const std::vector<unsigned char> &ea,
-                                      bool rHasEvenY,
-                                      bool ggaccIsOne) {
-            return adapter.CardMusig2Sign(keyNumber, secNonce, b, ea, rHasEvenY, ggaccIsOne);
-        };
+        auto params = BuildSatochipSignPsbtParams(env, adapter, challenge_response);
 
         auto transaction = NunchukProvider::get()->nu->SignSatochipTransaction(
                 params,
@@ -409,6 +417,34 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_signSatochipTransaction(
                 StringWrapper(env, tx_id)
         );
         return Deserializer::convert2JTransaction(env, transaction);
+    } catch (BaseException &e) {
+        Deserializer::convert2JException(env, e);
+        return nullptr;
+    } catch (std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_signSatochipPsbt(
+        JNIEnv *env,
+        jobject thiz,
+        jobject callback,
+        jobject wallet,
+        jstring psbt,
+        jbyteArray challenge_response
+) {
+    try {
+        SatochipCallbackAdapter adapter(env, callback);
+        auto params = BuildSatochipSignPsbtParams(env, adapter, challenge_response);
+        auto signed_psbt = NunchukProvider::get()->nu->SignSatochipTransaction(
+                params,
+                Serializer::convert2CWallet(env, wallet),
+                StringWrapper(env, psbt)
+        );
+        return env->NewStringUTF(signed_psbt.c_str());
     } catch (BaseException &e) {
         Deserializer::convert2JException(env, e);
         return nullptr;

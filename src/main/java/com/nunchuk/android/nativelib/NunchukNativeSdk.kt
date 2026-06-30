@@ -924,6 +924,14 @@ class NunchukNativeSdk {
     ) = nunchukAndroid.signSatochipTransaction(callback, walletId, txId, challengeResponse)
 
     @Throws(NCNativeException::class)
+    fun signSatochipPsbt(
+        callback: SatochipCardCallback,
+        wallet: Wallet,
+        psbt: String,
+        challengeResponse: ByteArray? = null,
+    ) = nunchukAndroid.signSatochipPsbt(callback, wallet.toBridge(), psbt, challengeResponse)
+
+    @Throws(NCNativeException::class)
     fun getMatrixEvent(
         eventId: String,
     ) = nunchukAndroid.getMatrixEvent(eventId)

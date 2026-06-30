@@ -711,6 +711,14 @@ internal class LibNunchukAndroid {
     ): Transaction
 
     @Throws(NCNativeException::class)
+    external fun signSatochipPsbt(
+        callback: SatochipCardCallback,
+        wallet: WalletBridge,
+        psbt: String,
+        challengeResponse: ByteArray?,
+    ): String
+
+    @Throws(NCNativeException::class)
     external fun getSatsCardStatus(
         isoDep: IsoDep,
     ): SatsCardStatus
