@@ -22,6 +22,8 @@ package com.nunchuk.android.nativelib
 import android.nfc.NdefRecord
 import android.nfc.tech.IsoDep
 import com.nunchuk.android.exception.NCNativeException
+import com.nunchuk.android.ledger.LedgerSessionConfig
+import com.nunchuk.android.ledger.LedgerStep
 import com.nunchuk.android.model.Amount
 import com.nunchuk.android.model.BSMSData
 import com.nunchuk.android.model.BtcUri
@@ -1762,6 +1764,25 @@ internal class LibNunchukAndroid {
 
     @Throws(NCNativeException::class)
     external fun getTransactionSigners(walletId: String, txId: String): List<SingleSigner>
+
+    @Throws(NCNativeException::class)
+    external fun ledgerCreateSession(sessionId: String, config: LedgerSessionConfig)
+
+    @Throws(NCNativeException::class)
+    external fun ledgerReset(sessionId: String)
+
+    @Throws(NCNativeException::class)
+    external fun ledgerGetExtendedPublicKey(
+        sessionId: String,
+        derivationPath: String,
+        checkOnDevice: Boolean,
+    ): LedgerStep
+
+    @Throws(NCNativeException::class)
+    external fun ledgerOnData(sessionId: String, data: ByteArray): LedgerStep
+
+    @Throws(NCNativeException::class)
+    external fun ledgerGetExtendedPublicKeyResult(sessionId: String): String
 
     companion object {
         init {

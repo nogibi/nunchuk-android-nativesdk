@@ -26,6 +26,7 @@ add_library(nunchuk-android SHARED
         sync-jni.cpp
         tap-protocol-jni.cpp
         satscard-jni.cpp
+        ledger-jni.cpp
         mk4.cpp
         string-wrapper.h
         group-wallet-jni.cpp
@@ -45,4 +46,5 @@ target_link_libraries(nunchuk-android nunchuk)
 target_include_directories(nunchuk-android PUBLIC
         "${PROJECT_SOURCE_DIR}"
         "${PROJECT_SOURCE_DIR}/libnunchuk/include"
+        "${PROJECT_SOURCE_DIR}/libnunchuk/src"
 )
