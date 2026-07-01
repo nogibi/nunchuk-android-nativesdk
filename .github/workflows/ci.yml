@@ -24,6 +24,46 @@ jobs:
           git submodule sync
           git submodule update --init --recursive --depth 1
 
+      - name: Prepare dependency cache key
+        run: |
+          mkdir -p .github/cache-keys
+          {
+            git -C src/main/native/libnunchuk rev-parse HEAD
+            git -C src/main/native/libnunchuk submodule status --recursive
+            sha256sum Dockerfile
+            sha256sum src/main/native/.install_deps.sh
+            sha256sum src/main/native/patches/*
+          } > .github/cache-keys/libnunchuk-deps.txt
+
+      - name: Cache libnunchuk dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            src/main/native/libnunchuk/contrib/bitcoin/depends/built
+            src/main/native/libnunchuk/contrib/bitcoin/depends/sources
+            src/main/native/libnunchuk/contrib/bitcoin/depends/work
+            src/main/native/libnunchuk/contrib/bitcoin/depends/aarch64-linux-android
+            src/main/native/libnunchuk/contrib/bitcoin/depends/armv7a-linux-androideabi
+            src/main/native/libnunchuk/contrib/openssl/aarch64-linux-android
+            src/main/native/libnunchuk/contrib/openssl/armv7a-linux-androideabi
+          key: ${{ runner.os }}-libnunchuk-deps-${{ hashFiles('.github/cache-keys/libnunchuk-deps.txt') }}
+
+      - name: Cache Android build
+        uses: actions/cache@v4
+        with:
+          path: |
+            .gradle-cache/caches
+            .gradle-cache/wrapper
+            .gradle
+            .cxx
+            build/generated
+            build/intermediates
+            build/kotlin
+            build/tmp
+          key: ${{ runner.os }}-android-build-${{ hashFiles('**/*.gradle', 'gradle.properties', 'gradle/wrapper/gradle-wrapper.properties', 'configs/**/*.gradle', 'src/main/AndroidManifest.xml', 'src/main/java/**', 'src/main/kotlin/**', 'src/main/res/**', 'src/main/native/CMakeLists.txt', 'src/main/native/**/*.cpp', 'src/main/native/**/*.h') }}
+          restore-keys: |
+            ${{ runner.os }}-android-build-
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
@@ -59,12 +99,13 @@ jobs:
         run: |
           docker run  --rm \
             -v ${{ github.workspace }}:/nunchuk-android-nativesdk \
+            -e GRADLE_USER_HOME=/nunchuk-android-nativesdk/.gradle-cache \
             -w /nunchuk-android-nativesdk \
             ghcr.io/${{ github.repository }}/nunchuk-builder \
-            ./gradlew assembleArmRelease
+            ./gradlew --build-cache assembleArmRelease
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: nativesdk-${{ env.GITHUB_SHA }}
+          name: nativesdk-${{ github.sha }}
           path: build/outputs/aar
