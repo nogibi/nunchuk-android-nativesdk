@@ -1779,6 +1779,9 @@ internal class LibNunchukAndroid {
     ): LedgerStep
 
     @Throws(NCNativeException::class)
+    external fun ledgerResume(sessionId: String): LedgerStep
+
+    @Throws(NCNativeException::class)
     external fun ledgerOnData(sessionId: String, data: ByteArray): LedgerStep
 
     @Throws(NCNativeException::class)

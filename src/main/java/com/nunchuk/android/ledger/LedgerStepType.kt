@@ -5,4 +5,5 @@ enum class LedgerStepType {
     READ_MORE,
     COMPLETE,
     FAILED,
+    APP_SWITCH,
 }

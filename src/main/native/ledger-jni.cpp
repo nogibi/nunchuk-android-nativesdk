@@ -106,6 +106,8 @@ int stepOrdinal(nunchuk::ledger::LedgerStepType type) {
             return 2;
         case nunchuk::ledger::LedgerStepType::FAILED:
             return 3;
+        case nunchuk::ledger::LedgerStepType::APP_SWITCH:
+            return 4;
     }
     return 3;
 }
@@ -157,7 +159,6 @@ nunchuk::ledger::LedgerSessionConfig toLedgerSessionConfig(JNIEnv *env, jobject 
 nunchuk::ledger::GetExtendedPublicKeyOptions getXpubOptions(jboolean check_on_device) {
     nunchuk::ledger::GetExtendedPublicKeyOptions options;
     options.check_on_device = check_on_device;
-    options.skip_open_app = true;
     return options;
 }
 
@@ -204,6 +205,21 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetExtendedPublicKey(
                 toString(env, derivation_path),
                 getXpubOptions(check_on_device));
         return toLedgerStep(env, step);
+    } catch (std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerResume(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id) {
+    try {
+        auto &session = g_ledger_manager.forSession(toString(env, session_id));
+        return toLedgerStep(env, session.resume());
     } catch (std::exception &e) {
         Deserializer::convertStdException2JException(env, e);
         return nullptr;

@@ -28,6 +28,11 @@ class LedgerNativeClient {
     )
 
     @Throws(NCNativeException::class)
+    fun resume(sessionId: String): LedgerStep {
+        return native.ledgerResume(sessionId)
+    }
+
+    @Throws(NCNativeException::class)
     fun onData(sessionId: String, data: ByteArray): LedgerStep {
         return native.ledgerOnData(sessionId, data)
     }
