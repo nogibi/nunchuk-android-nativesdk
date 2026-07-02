@@ -48,6 +48,27 @@ jobs:
             src/main/native/libnunchuk/contrib/openssl/armv7a-linux-androideabi
           key: ${{ runner.os }}-libnunchuk-deps-${{ hashFiles('.github/cache-keys/libnunchuk-deps.txt') }}
 
+      - name: Prepare Android cache key
+        run: |
+          mkdir -p .github/cache-keys
+          {
+            git ls-files -z -- \
+              '*.gradle' \
+              'gradle.properties' \
+              'gradle/wrapper/gradle-wrapper.properties' \
+              'configs' \
+              'src/main/AndroidManifest.xml' \
+              'src/main/java' \
+              'src/main/kotlin' \
+              'src/main/res' \
+              'src/main/native' \
+              ':(exclude)src/main/native/libnunchuk' |
+              sort -z |
+              xargs -0 -r sha256sum
+            git -C src/main/native/libnunchuk rev-parse HEAD
+            git -C src/main/native/libnunchuk submodule status --recursive
+          } > .github/cache-keys/android-build.txt
+
       - name: Cache Android build
         uses: actions/cache@v4
         with:
@@ -60,7 +81,7 @@ jobs:
             build/intermediates
             build/kotlin
             build/tmp
-          key: ${{ runner.os }}-android-build-${{ hashFiles('**/*.gradle', 'gradle.properties', 'gradle/wrapper/gradle-wrapper.properties', 'configs/**/*.gradle', 'src/main/AndroidManifest.xml', 'src/main/java/**', 'src/main/kotlin/**', 'src/main/res/**', 'src/main/native/CMakeLists.txt', 'src/main/native/**/*.cpp', 'src/main/native/**/*.h') }}
+          key: ${{ runner.os }}-android-build-${{ hashFiles('.github/cache-keys/android-build.txt') }}
           restore-keys: |
             ${{ runner.os }}-android-build-
 

@@ -1779,6 +1779,9 @@ internal class LibNunchukAndroid {
     ): LedgerStep
 
     @Throws(NCNativeException::class)
+    external fun ledgerGetMasterFingerprint(sessionId: String): LedgerStep
+
+    @Throws(NCNativeException::class)
     external fun ledgerResume(sessionId: String): LedgerStep
 
     @Throws(NCNativeException::class)
@@ -1786,6 +1789,9 @@ internal class LibNunchukAndroid {
 
     @Throws(NCNativeException::class)
     external fun ledgerGetExtendedPublicKeyResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun ledgerGetMasterFingerprintResult(sessionId: String): ByteArray
 
     companion object {
         init {

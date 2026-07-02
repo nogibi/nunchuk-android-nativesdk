@@ -228,6 +228,21 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerResume(
 
 extern "C"
 JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetMasterFingerprint(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id) {
+    try {
+        auto &session = g_ledger_manager.forSession(toString(env, session_id));
+        return toLedgerStep(env, session.getMasterFingerprint());
+    } catch (std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
 Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerOnData(
         JNIEnv *env,
         jobject thiz,
@@ -237,6 +252,22 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerOnData(
         auto &session = g_ledger_manager.forSession(toString(env, session_id));
         auto step = session.onData(toBytes(env, data));
         return toLedgerStep(env, step);
+    } catch (std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jbyteArray JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetMasterFingerprintResult(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id) {
+    try {
+        auto &session = g_ledger_manager.forSession(toString(env, session_id));
+        auto result = session.result<nunchuk::ledger::GetMasterFingerprintResult>();
+        return toByteArray(env, result.master_fingerprint);
     } catch (std::exception &e) {
         Deserializer::convertStdException2JException(env, e);
         return nullptr;
