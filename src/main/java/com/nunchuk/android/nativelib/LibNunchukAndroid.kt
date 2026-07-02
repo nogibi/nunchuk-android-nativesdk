@@ -22,6 +22,7 @@ package com.nunchuk.android.nativelib
 import android.nfc.NdefRecord
 import android.nfc.tech.IsoDep
 import com.nunchuk.android.exception.NCNativeException
+import com.nunchuk.android.ledger.LedgerMessageSignature
 import com.nunchuk.android.ledger.LedgerSessionConfig
 import com.nunchuk.android.ledger.LedgerStep
 import com.nunchuk.android.model.Amount
@@ -1782,6 +1783,13 @@ internal class LibNunchukAndroid {
     external fun ledgerGetMasterFingerprint(sessionId: String): LedgerStep
 
     @Throws(NCNativeException::class)
+    external fun ledgerSignMessage(
+        sessionId: String,
+        derivationPath: String,
+        message: String,
+    ): LedgerStep
+
+    @Throws(NCNativeException::class)
     external fun ledgerResume(sessionId: String): LedgerStep
 
     @Throws(NCNativeException::class)
@@ -1792,6 +1800,9 @@ internal class LibNunchukAndroid {
 
     @Throws(NCNativeException::class)
     external fun ledgerGetMasterFingerprintResult(sessionId: String): ByteArray
+
+    @Throws(NCNativeException::class)
+    external fun ledgerGetMessageSignatureResult(sessionId: String): LedgerMessageSignature
 
     companion object {
         init {

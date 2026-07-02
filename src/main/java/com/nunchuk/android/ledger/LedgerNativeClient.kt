@@ -33,6 +33,15 @@ class LedgerNativeClient {
     }
 
     @Throws(NCNativeException::class)
+    fun signMessage(
+        sessionId: String,
+        derivationPath: String,
+        message: String,
+    ): LedgerStep {
+        return native.ledgerSignMessage(sessionId, derivationPath, message)
+    }
+
+    @Throws(NCNativeException::class)
     fun resume(sessionId: String): LedgerStep {
         return native.ledgerResume(sessionId)
     }
@@ -50,5 +59,10 @@ class LedgerNativeClient {
     @Throws(NCNativeException::class)
     fun getMasterFingerprintResult(sessionId: String): ByteArray {
         return native.ledgerGetMasterFingerprintResult(sessionId)
+    }
+
+    @Throws(NCNativeException::class)
+    fun getMessageSignatureResult(sessionId: String): LedgerMessageSignature {
+        return native.ledgerGetMessageSignatureResult(sessionId)
     }
 }
