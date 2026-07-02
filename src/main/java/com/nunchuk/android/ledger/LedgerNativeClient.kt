@@ -42,6 +42,23 @@ class LedgerNativeClient {
     }
 
     @Throws(NCNativeException::class)
+    fun getWalletAddress(
+        sessionId: String,
+        wallet: LedgerRegisteredWallet,
+        addressIndex: Int,
+        checkOnDevice: Boolean = false,
+        change: Boolean = false,
+    ): LedgerStep {
+        return native.ledgerGetWalletAddress(
+            sessionId,
+            wallet,
+            addressIndex,
+            checkOnDevice,
+            change,
+        )
+    }
+
+    @Throws(NCNativeException::class)
     fun resume(sessionId: String): LedgerStep {
         return native.ledgerResume(sessionId)
     }
@@ -74,5 +91,10 @@ class LedgerNativeClient {
     @Throws(NCNativeException::class)
     fun getMessageSignatureStringResult(sessionId: String): String {
         return native.ledgerGetMessageSignatureStringResult(sessionId)
+    }
+
+    @Throws(NCNativeException::class)
+    fun getWalletAddressResult(sessionId: String): String {
+        return native.ledgerGetWalletAddressResult(sessionId)
     }
 }

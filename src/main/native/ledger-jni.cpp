@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -173,6 +174,43 @@ nunchuk::ledger::LedgerSessionConfig toLedgerSessionConfig(JNIEnv *env, jobject 
     return config;
 }
 
+nunchuk::ledger::RegisteredWallet toRegisteredWallet(JNIEnv *env, jobject wallet_object) {
+    auto wallet_class = env->GetObjectClass(wallet_object);
+    auto name_field = env->GetFieldID(wallet_class, "name", "Ljava/lang/String;");
+    auto descriptor_field = env->GetFieldID(wallet_class, "descriptorTemplate", "Ljava/lang/String;");
+    auto keys_field = env->GetFieldID(wallet_class, "keysInfo", "Ljava/util/List;");
+    auto hmac_field = env->GetFieldID(wallet_class, "hmac", "[B");
+
+    auto name_object = static_cast<jstring>(env->GetObjectField(wallet_object, name_field));
+    auto descriptor_object = static_cast<jstring>(env->GetObjectField(wallet_object, descriptor_field));
+    auto keys_object = env->GetObjectField(wallet_object, keys_field);
+    auto hmac_object = static_cast<jbyteArray>(env->GetObjectField(wallet_object, hmac_field));
+
+    nunchuk::ledger::RegisteredWallet wallet;
+    wallet.name = toString(env, name_object);
+    wallet.policy.descriptor_template = toString(env, descriptor_object);
+    wallet.hmac = toBytes(env, hmac_object);
+
+    auto keys_class = env->GetObjectClass(keys_object);
+    auto size_method = env->GetMethodID(keys_class, "size", "()I");
+    auto get_method = env->GetMethodID(keys_class, "get", "(I)Ljava/lang/Object;");
+    const auto keys_size = env->CallIntMethod(keys_object, size_method);
+    wallet.policy.keys_info.reserve(static_cast<size_t>(keys_size));
+    for (jint i = 0; i < keys_size; ++i) {
+        auto key_object = static_cast<jstring>(env->CallObjectMethod(keys_object, get_method, i));
+        wallet.policy.keys_info.push_back(toString(env, key_object));
+        env->DeleteLocalRef(key_object);
+    }
+
+    env->DeleteLocalRef(keys_class);
+    env->DeleteLocalRef(name_object);
+    env->DeleteLocalRef(descriptor_object);
+    env->DeleteLocalRef(keys_object);
+    env->DeleteLocalRef(hmac_object);
+    env->DeleteLocalRef(wallet_class);
+    return wallet;
+}
+
 nunchuk::ledger::GetExtendedPublicKeyOptions getXpubOptions(jboolean check_on_device) {
     nunchuk::ledger::GetExtendedPublicKeyOptions options;
     options.check_on_device = check_on_device;
@@ -279,6 +317,34 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerSignMessage(
 
 extern "C"
 JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetWalletAddress(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id,
+        jobject wallet,
+        jint address_index,
+        jboolean check_on_device,
+        jboolean change) {
+    try {
+        if (address_index < 0) {
+            throw std::invalid_argument("Address index must be non-negative");
+        }
+        nunchuk::ledger::WalletAddressOptions options;
+        options.check_on_device = check_on_device;
+        options.change = change;
+        auto &session = g_ledger_manager.forSession(toString(env, session_id));
+        return toLedgerStep(env, session.getWalletAddress(
+                toRegisteredWallet(env, wallet),
+                static_cast<uint32_t>(address_index),
+                options));
+    } catch (std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
 Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerOnData(
         JNIEnv *env,
         jobject thiz,
@@ -368,6 +434,22 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetExtendedPublicKeyR
         auto &session = g_ledger_manager.forSession(toString(env, session_id));
         auto result = session.result<nunchuk::ledger::GetExtendedPublicKeyResult>();
         return env->NewStringUTF(result.extended_public_key.c_str());
+    } catch (std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetWalletAddressResult(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id) {
+    try {
+        auto &session = g_ledger_manager.forSession(toString(env, session_id));
+        auto result = session.result<nunchuk::ledger::WalletAddress>();
+        return env->NewStringUTF(result.address.c_str());
     } catch (std::exception &e) {
         Deserializer::convertStdException2JException(env, e);
         return nullptr;
