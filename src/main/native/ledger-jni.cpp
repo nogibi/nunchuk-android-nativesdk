@@ -62,6 +62,38 @@ jbyteArray toByteArray(JNIEnv *env, const std::vector<unsigned char> &bytes) {
     return array;
 }
 
+jobject toStringList(JNIEnv *env, const std::vector<std::string> &items) {
+    auto list_class = env->FindClass("java/util/ArrayList");
+    auto constructor = env->GetMethodID(list_class, "<init>", "()V");
+    auto add_method = env->GetMethodID(list_class, "add", "(Ljava/lang/Object;)Z");
+    auto list = env->NewObject(list_class, constructor);
+
+    for (const auto &item: items) {
+        auto string = env->NewStringUTF(item.c_str());
+        env->CallBooleanMethod(list, add_method, string);
+        env->DeleteLocalRef(string);
+    }
+
+    env->DeleteLocalRef(list_class);
+    return list;
+}
+
+std::vector<std::string> toStringVector(JNIEnv *env, jobject list_object) {
+    std::vector<std::string> values;
+    auto list_class = env->GetObjectClass(list_object);
+    auto size_method = env->GetMethodID(list_class, "size", "()I");
+    auto get_method = env->GetMethodID(list_class, "get", "(I)Ljava/lang/Object;");
+    const auto size = env->CallIntMethod(list_object, size_method);
+    values.reserve(static_cast<size_t>(size));
+    for (jint i = 0; i < size; ++i) {
+        auto value_object = static_cast<jstring>(env->CallObjectMethod(list_object, get_method, i));
+        values.push_back(toString(env, value_object));
+        env->DeleteLocalRef(value_object);
+    }
+    env->DeleteLocalRef(list_class);
+    return values;
+}
+
 jobject toWriteList(JNIEnv *env, const std::vector<std::vector<unsigned char>> &writes) {
     auto list_class = env->FindClass("java/util/ArrayList");
     auto constructor = env->GetMethodID(list_class, "<init>", "()V");
@@ -150,6 +182,26 @@ jobject toLedgerMessageSignature(JNIEnv *env, const nunchuk::ledger::MessageSign
     return result;
 }
 
+jobject toLedgerRegisteredWallet(JNIEnv *env, const nunchuk::ledger::RegisteredWallet &wallet) {
+    auto wallet_class = env->FindClass("com/nunchuk/android/ledger/LedgerRegisteredWallet");
+    auto constructor = env->GetMethodID(
+            wallet_class,
+            "<init>",
+            "(Ljava/lang/String;Ljava/lang/String;Ljava/util/List;[B)V");
+    auto name = env->NewStringUTF(wallet.name.c_str());
+    auto descriptor = env->NewStringUTF(wallet.policy.descriptor_template.c_str());
+    auto keys = toStringList(env, wallet.policy.keys_info);
+    auto hmac = toByteArray(env, wallet.hmac);
+    auto result = env->NewObject(wallet_class, constructor, name, descriptor, keys, hmac);
+
+    env->DeleteLocalRef(name);
+    env->DeleteLocalRef(descriptor);
+    env->DeleteLocalRef(keys);
+    env->DeleteLocalRef(hmac);
+    env->DeleteLocalRef(wallet_class);
+    return result;
+}
+
 nunchuk::ledger::LedgerSessionConfig toLedgerSessionConfig(JNIEnv *env, jobject config_object) {
     auto config_class = env->GetObjectClass(config_object);
     auto transport_field = env->GetFieldID(
@@ -174,6 +226,34 @@ nunchuk::ledger::LedgerSessionConfig toLedgerSessionConfig(JNIEnv *env, jobject 
     return config;
 }
 
+nunchuk::Bip388Policy toBip388Policy(JNIEnv *env, jobject policy_object) {
+    auto policy_class = env->GetObjectClass(policy_object);
+    auto descriptor_field = env->GetFieldID(policy_class, "descriptorTemplate", "Ljava/lang/String;");
+    auto keys_field = env->GetFieldID(policy_class, "keysInfo", "Ljava/util/List;");
+
+    auto descriptor_object = static_cast<jstring>(env->GetObjectField(policy_object, descriptor_field));
+    auto keys_object = env->GetObjectField(policy_object, keys_field);
+
+    nunchuk::Bip388Policy policy;
+    policy.descriptor_template = toString(env, descriptor_object);
+    policy.keys_info = toStringVector(env, keys_object);
+
+    env->DeleteLocalRef(descriptor_object);
+    env->DeleteLocalRef(keys_object);
+    env->DeleteLocalRef(policy_class);
+    return policy;
+}
+
+std::string walletPolicyName(JNIEnv *env, jobject policy_object) {
+    auto policy_class = env->GetObjectClass(policy_object);
+    auto name_field = env->GetFieldID(policy_class, "name", "Ljava/lang/String;");
+    auto name_object = static_cast<jstring>(env->GetObjectField(policy_object, name_field));
+    auto name = toString(env, name_object);
+    env->DeleteLocalRef(name_object);
+    env->DeleteLocalRef(policy_class);
+    return name;
+}
+
 nunchuk::ledger::RegisteredWallet toRegisteredWallet(JNIEnv *env, jobject wallet_object) {
     auto wallet_class = env->GetObjectClass(wallet_object);
     auto name_field = env->GetFieldID(wallet_class, "name", "Ljava/lang/String;");
@@ -190,19 +270,8 @@ nunchuk::ledger::RegisteredWallet toRegisteredWallet(JNIEnv *env, jobject wallet
     wallet.name = toString(env, name_object);
     wallet.policy.descriptor_template = toString(env, descriptor_object);
     wallet.hmac = toBytes(env, hmac_object);
+    wallet.policy.keys_info = toStringVector(env, keys_object);
 
-    auto keys_class = env->GetObjectClass(keys_object);
-    auto size_method = env->GetMethodID(keys_class, "size", "()I");
-    auto get_method = env->GetMethodID(keys_class, "get", "(I)Ljava/lang/Object;");
-    const auto keys_size = env->CallIntMethod(keys_object, size_method);
-    wallet.policy.keys_info.reserve(static_cast<size_t>(keys_size));
-    for (jint i = 0; i < keys_size; ++i) {
-        auto key_object = static_cast<jstring>(env->CallObjectMethod(keys_object, get_method, i));
-        wallet.policy.keys_info.push_back(toString(env, key_object));
-        env->DeleteLocalRef(key_object);
-    }
-
-    env->DeleteLocalRef(keys_class);
     env->DeleteLocalRef(name_object);
     env->DeleteLocalRef(descriptor_object);
     env->DeleteLocalRef(keys_object);
@@ -317,6 +386,24 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerSignMessage(
 
 extern "C"
 JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerRegisterWallet(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id,
+        jobject policy) {
+    try {
+        auto &session = g_ledger_manager.forSession(toString(env, session_id));
+        auto wallet_name = walletPolicyName(env, policy);
+        auto bip388_policy = toBip388Policy(env, policy);
+        return toLedgerStep(env, session.registerWallet(bip388_policy, wallet_name));
+    } catch (std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
 Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetWalletAddress(
         JNIEnv *env,
         jobject thiz,
@@ -418,6 +505,22 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetMessageSignatureSt
         auto &session = g_ledger_manager.forSession(toString(env, session_id));
         auto result = session.result<nunchuk::ledger::MessageSignature>();
         return env->NewStringUTF(result.toString().c_str());
+    } catch (std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetRegisteredWalletResult(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id) {
+    try {
+        auto &session = g_ledger_manager.forSession(toString(env, session_id));
+        auto result = session.result<nunchuk::ledger::RegisteredWallet>();
+        return toLedgerRegisteredWallet(env, result);
     } catch (std::exception &e) {
         Deserializer::convertStdException2JException(env, e);
         return nullptr;

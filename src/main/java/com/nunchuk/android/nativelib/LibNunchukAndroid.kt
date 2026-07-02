@@ -26,6 +26,7 @@ import com.nunchuk.android.ledger.LedgerMessageSignature
 import com.nunchuk.android.ledger.LedgerRegisteredWallet
 import com.nunchuk.android.ledger.LedgerSessionConfig
 import com.nunchuk.android.ledger.LedgerStep
+import com.nunchuk.android.ledger.LedgerWalletPolicy
 import com.nunchuk.android.model.Amount
 import com.nunchuk.android.model.BSMSData
 import com.nunchuk.android.model.BtcUri
@@ -1791,6 +1792,12 @@ internal class LibNunchukAndroid {
     ): LedgerStep
 
     @Throws(NCNativeException::class)
+    external fun ledgerRegisterWallet(
+        sessionId: String,
+        policy: LedgerWalletPolicy,
+    ): LedgerStep
+
+    @Throws(NCNativeException::class)
     external fun ledgerGetWalletAddress(
         sessionId: String,
         wallet: LedgerRegisteredWallet,
@@ -1819,6 +1826,9 @@ internal class LibNunchukAndroid {
 
     @Throws(NCNativeException::class)
     external fun ledgerGetMessageSignatureStringResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun ledgerGetRegisteredWalletResult(sessionId: String): LedgerRegisteredWallet
 
     @Throws(NCNativeException::class)
     external fun ledgerGetWalletAddressResult(sessionId: String): String

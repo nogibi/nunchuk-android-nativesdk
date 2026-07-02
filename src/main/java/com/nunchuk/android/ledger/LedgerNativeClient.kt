@@ -42,6 +42,14 @@ class LedgerNativeClient {
     }
 
     @Throws(NCNativeException::class)
+    fun registerWallet(
+        sessionId: String,
+        policy: LedgerWalletPolicy,
+    ): LedgerStep {
+        return native.ledgerRegisterWallet(sessionId, policy)
+    }
+
+    @Throws(NCNativeException::class)
     fun getWalletAddress(
         sessionId: String,
         wallet: LedgerRegisteredWallet,
@@ -91,6 +99,11 @@ class LedgerNativeClient {
     @Throws(NCNativeException::class)
     fun getMessageSignatureStringResult(sessionId: String): String {
         return native.ledgerGetMessageSignatureStringResult(sessionId)
+    }
+
+    @Throws(NCNativeException::class)
+    fun getRegisteredWalletResult(sessionId: String): LedgerRegisteredWallet {
+        return native.ledgerGetRegisteredWalletResult(sessionId)
     }
 
     @Throws(NCNativeException::class)
