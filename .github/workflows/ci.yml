@@ -28,7 +28,6 @@ jobs:
         run: |
           mkdir -p .github/cache-keys
           {
-            git -C src/main/native/libnunchuk rev-parse HEAD
             git -C src/main/native/libnunchuk submodule status --recursive
             sha256sum Dockerfile
             sha256sum src/main/native/.install_deps.sh
@@ -85,6 +84,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-android-build-
 
+      - name: Cache C/C++ compiler outputs
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ${{ runner.os }}-ccache-${{ hashFiles('.github/cache-keys/android-build.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
@@ -121,6 +128,12 @@ jobs:
           docker run  --rm \
             -v ${{ github.workspace }}:/nunchuk-android-nativesdk \
             -e GRADLE_USER_HOME=/nunchuk-android-nativesdk/.gradle-cache \
+            -e CCACHE_DIR=/nunchuk-android-nativesdk/.ccache \
+            -e CCACHE_BASEDIR=/nunchuk-android-nativesdk \
+            -e CCACHE_COMPILERCHECK=content \
+            -e CCACHE_NOHASHDIR=true \
+            -e CCACHE_MAXSIZE=2G \
+            -e CCACHE_EXECUTABLE=ccache \
             -w /nunchuk-android-nativesdk \
             ghcr.io/${{ github.repository }}/nunchuk-builder \
             ./gradlew --build-cache assembleArmRelease

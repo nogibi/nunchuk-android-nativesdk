@@ -3,7 +3,7 @@ FROM docker.io/debian:bookworm-20250811-slim
 RUN set -ex; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install --yes -o APT::Install-Suggests=false --no-install-recommends \
-        bzip2 make automake ninja-build g++-multilib libtool binutils-gold \
+        bzip2 make automake ninja-build g++-multilib libtool binutils-gold ccache \
         bsdextrautils pkg-config python3 patch bison curl unzip git openjdk-17-jdk disorderfs; \
     rm -rf /var/lib/apt/lists/*;
 

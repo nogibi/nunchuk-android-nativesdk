@@ -62,7 +62,17 @@ class LedgerNativeClient {
     }
 
     @Throws(NCNativeException::class)
+    fun getMasterFingerprintStringResult(sessionId: String): String {
+        return native.ledgerGetMasterFingerprintStringResult(sessionId)
+    }
+
+    @Throws(NCNativeException::class)
     fun getMessageSignatureResult(sessionId: String): LedgerMessageSignature {
         return native.ledgerGetMessageSignatureResult(sessionId)
+    }
+
+    @Throws(NCNativeException::class)
+    fun getMessageSignatureStringResult(sessionId: String): String {
+        return native.ledgerGetMessageSignatureStringResult(sessionId)
     }
 }

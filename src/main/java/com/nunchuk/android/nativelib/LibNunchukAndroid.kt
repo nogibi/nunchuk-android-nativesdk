@@ -1802,7 +1802,13 @@ internal class LibNunchukAndroid {
     external fun ledgerGetMasterFingerprintResult(sessionId: String): ByteArray
 
     @Throws(NCNativeException::class)
+    external fun ledgerGetMasterFingerprintStringResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
     external fun ledgerGetMessageSignatureResult(sessionId: String): LedgerMessageSignature
+
+    @Throws(NCNativeException::class)
+    external fun ledgerGetMessageSignatureStringResult(sessionId: String): String
 
     companion object {
         init {

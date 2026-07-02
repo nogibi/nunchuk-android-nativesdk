@@ -311,6 +311,22 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetMasterFingerprintR
 }
 
 extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetMasterFingerprintStringResult(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id) {
+    try {
+        auto &session = g_ledger_manager.forSession(toString(env, session_id));
+        auto result = session.result<nunchuk::ledger::GetMasterFingerprintResult>();
+        return env->NewStringUTF(result.toString().c_str());
+    } catch (std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetMessageSignatureResult(
         JNIEnv *env,
@@ -320,6 +336,22 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetMessageSignatureRe
         auto &session = g_ledger_manager.forSession(toString(env, session_id));
         auto result = session.result<nunchuk::ledger::MessageSignature>();
         return toLedgerMessageSignature(env, result);
+    } catch (std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetMessageSignatureStringResult(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id) {
+    try {
+        auto &session = g_ledger_manager.forSession(toString(env, session_id));
+        auto result = session.result<nunchuk::ledger::MessageSignature>();
+        return env->NewStringUTF(result.toString().c_str());
     } catch (std::exception &e) {
         Deserializer::convertStdException2JException(env, e);
         return nullptr;
