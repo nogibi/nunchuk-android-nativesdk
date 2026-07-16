@@ -1890,6 +1890,9 @@ internal class LibNunchukAndroid {
     external fun getTimelockTemplate(timelockType: Int, timeUnit: Int, time: Long): String
 
     @Throws(NCNativeException::class)
+    external fun ledgerSetChain(chain: Int)
+
+    @Throws(NCNativeException::class)
     external fun ledgerCreateSession(sessionId: String, transport: LedgerTransport)
 
     @Throws(NCNativeException::class)

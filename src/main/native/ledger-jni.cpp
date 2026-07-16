@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "deserializer.h"
+#include "serializer.h"
 #include "string-wrapper.h"
 #include "utils/ledger/ledger_manager.hpp"
 #include "utils/ledger/types.hpp"
@@ -248,6 +249,19 @@ nunchuk::ledger::RegisteredWallet toRegisteredWallet(JNIEnv *env, jobject wallet
 }
 
 }  // namespace
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerSetChain(
+        JNIEnv *env,
+        jobject thiz,
+        jint chain) {
+    try {
+        nunchuk::Utils::SetChain(Serializer::convert2CChain(chain));
+    } catch (std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+    }
+}
 
 extern "C"
 JNIEXPORT void JNICALL

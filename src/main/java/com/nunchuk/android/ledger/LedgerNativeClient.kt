@@ -2,9 +2,13 @@ package com.nunchuk.android.ledger
 
 import com.nunchuk.android.exception.NCNativeException
 import com.nunchuk.android.nativelib.LibNunchukAndroid
+import com.nunchuk.android.type.Chain
 
 class LedgerNativeClient {
     private val native = LibNunchukAndroid()
+
+    @Throws(NCNativeException::class)
+    fun setChain(chain: Chain) = native.ledgerSetChain(chain.ordinal)
 
     @Throws(NCNativeException::class)
     fun createSession(sessionId: String, transport: LedgerTransport) =
