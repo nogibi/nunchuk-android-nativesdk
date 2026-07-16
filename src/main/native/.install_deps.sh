@@ -87,9 +87,15 @@ installOpenSSL() {
   abi=$1
   target=$2
   openssl_abi=$3
+  prefix="$PWD/$target"
   echo "-------------------------------------------------------------------------------"
   echo "                    Installing OpenSSL for $abi $target                        "
   echo "-------------------------------------------------------------------------------"
+
+  if [ -f "$prefix/lib/libssl.a" ] && [ -f "$prefix/lib/libcrypto.a" ] && [ -d "$prefix/include/openssl" ]; then
+    echo "Using cached OpenSSL for $abi at $prefix"
+    return
+  fi
 
   export AR=$TOOLCHAIN/bin/llvm-ar
   export CC=$TOOLCHAIN/bin/$target$API-clang
@@ -99,7 +105,7 @@ installOpenSSL() {
   export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
   export STRIP=$TOOLCHAIN/bin/llvm-strip
   PATH=$TOOLCHAIN/bin:$PATH
-  ./Configure $openssl_abi -D__ANDROID_API__=$API --prefix="$PWD/$target"
+  ./Configure $openssl_abi -D__ANDROID_API__=$API --prefix="$prefix"
   make clean
   make -j $num_jobs
   make install_dev

@@ -1,5 +1,6 @@
 .gradle
 .gradle-home
+.ccache
 .idea
 /build
 /.cxx

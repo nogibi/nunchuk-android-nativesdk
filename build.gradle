@@ -5,6 +5,29 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'maven-publish'
 apply plugin: 'kotlin-parcelize'
 
+def cmakeArguments = [
+        "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON",
+        "-DBUILD_BITCOIN_BIN=OFF",
+        "-DBUILD_CLI=OFF",
+        "-DBUILD_DAEMON=OFF",
+        "-DBUILD_TESTS=OFF",
+        "-DBUILD_TX=OFF",
+        "-DBUILD_UTIL=OFF",
+        "-DBUILD_BENCH=OFF",
+        "-DBUILD_FUZZ_BINARY=OFF",
+        "-DBUILD_UTIL_CHAINSTATE=OFF",
+        "-DBUILD_KERNEL_LIB=OFF",
+        "-DBUILD_WALLET_TOOL=OFF"
+]
+
+def ccacheExecutable = System.getenv("CCACHE_EXECUTABLE")
+if (ccacheExecutable != null && !ccacheExecutable.trim().isEmpty()) {
+    cmakeArguments += [
+            "-DCMAKE_C_COMPILER_LAUNCHER=${ccacheExecutable}",
+            "-DCMAKE_CXX_COMPILER_LAUNCHER=${ccacheExecutable}"
+    ]
+}
+
 android {
     ndkVersion "27.2.12479018"
     namespace "com.nunchuk.android.nativesdk"
@@ -17,18 +40,7 @@ android {
                 cppFlags "-stdlib=libc++"
                 // The Android SDK embeds Bitcoin Core libraries, but does not need
                 // the host executables/tests that trigger host libevent lookup.
-                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON",
-                        "-DBUILD_BITCOIN_BIN=OFF",
-                        "-DBUILD_CLI=OFF",
-                        "-DBUILD_DAEMON=OFF",
-                        "-DBUILD_TESTS=OFF",
-                        "-DBUILD_TX=OFF",
-                        "-DBUILD_UTIL=OFF",
-                        "-DBUILD_BENCH=OFF",
-                        "-DBUILD_FUZZ_BINARY=OFF",
-                        "-DBUILD_UTIL_CHAINSTATE=OFF",
-                        "-DBUILD_KERNEL_LIB=OFF",
-                        "-DBUILD_WALLET_TOOL=OFF"
+                arguments(*cmakeArguments)
             }
         }
         javaCompileOptions {

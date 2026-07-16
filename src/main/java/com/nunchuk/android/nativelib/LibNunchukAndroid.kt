@@ -22,6 +22,11 @@ package com.nunchuk.android.nativelib
 import android.nfc.NdefRecord
 import android.nfc.tech.IsoDep
 import com.nunchuk.android.exception.NCNativeException
+import com.nunchuk.android.ledger.LedgerRegisteredWallet
+import com.nunchuk.android.ledger.LedgerRegisteredWalletResult
+import com.nunchuk.android.ledger.LedgerStep
+import com.nunchuk.android.ledger.LedgerTransport
+import com.nunchuk.android.ledger.LedgerWalletPolicy
 import com.nunchuk.android.model.Amount
 import com.nunchuk.android.model.BSMSData
 import com.nunchuk.android.model.BtcUri
@@ -1883,6 +1888,73 @@ internal class LibNunchukAndroid {
 
     @Throws(NCNativeException::class)
     external fun getTimelockTemplate(timelockType: Int, timeUnit: Int, time: Long): String
+
+    @Throws(NCNativeException::class)
+    external fun ledgerCreateSession(sessionId: String, transport: LedgerTransport)
+
+    @Throws(NCNativeException::class)
+    external fun ledgerGetExtendedPublicKey(
+        sessionId: String,
+        derivationPath: String,
+        checkOnDevice: Boolean,
+    ): LedgerStep
+
+    @Throws(NCNativeException::class)
+    external fun ledgerGetMasterFingerprint(sessionId: String): LedgerStep
+
+    @Throws(NCNativeException::class)
+    external fun ledgerSignMessage(
+        sessionId: String,
+        derivationPath: String,
+        message: String,
+    ): LedgerStep
+
+    @Throws(NCNativeException::class)
+    external fun ledgerRegisterWallet(
+        sessionId: String,
+        policy: LedgerWalletPolicy,
+    ): LedgerStep
+
+    @Throws(NCNativeException::class)
+    external fun ledgerGetWalletAddress(
+        sessionId: String,
+        wallet: LedgerRegisteredWallet,
+        addressIndex: Int,
+        checkOnDevice: Boolean,
+        change: Boolean,
+    ): LedgerStep
+
+    @Throws(NCNativeException::class)
+    external fun ledgerSignPsbt(
+        sessionId: String,
+        psbt: String,
+        wallet: LedgerRegisteredWallet,
+    ): LedgerStep
+
+    @Throws(NCNativeException::class)
+    external fun ledgerResume(sessionId: String): LedgerStep
+
+    @Throws(NCNativeException::class)
+    external fun ledgerOnData(sessionId: String, data: ByteArray): LedgerStep
+
+    @Throws(NCNativeException::class)
+    external fun ledgerGetExtendedPublicKeyResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun ledgerGetMasterFingerprintStringResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun ledgerGetMessageSignatureStringResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun ledgerGetRegisteredWalletResult(sessionId: String): LedgerRegisteredWalletResult
+
+    @Throws(NCNativeException::class)
+    external fun ledgerGetWalletAddressResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun ledgerGetSignPsbtStringResult(sessionId: String): String
+>>>>>>> cdb1357 (Update)
 
     companion object {
         init {
