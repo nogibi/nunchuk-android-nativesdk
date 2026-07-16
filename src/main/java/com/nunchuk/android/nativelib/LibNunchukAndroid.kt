@@ -1954,7 +1954,6 @@ internal class LibNunchukAndroid {
 
     @Throws(NCNativeException::class)
     external fun ledgerGetSignPsbtStringResult(sessionId: String): String
->>>>>>> cdb1357 (Update)
 
     companion object {
         init {
