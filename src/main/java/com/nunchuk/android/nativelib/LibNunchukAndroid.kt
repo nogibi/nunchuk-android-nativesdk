@@ -21,6 +21,9 @@ package com.nunchuk.android.nativelib
 
 import android.nfc.NdefRecord
 import android.nfc.tech.IsoDep
+import com.nunchuk.android.bitbox.BitBoxDeviceInfo
+import com.nunchuk.android.bitbox.BitBoxInitializeResult
+import com.nunchuk.android.bitbox.BitBoxStep
 import com.nunchuk.android.exception.NCNativeException
 import com.nunchuk.android.ledger.LedgerRegisteredWallet
 import com.nunchuk.android.ledger.LedgerRegisteredWalletResult
@@ -1957,6 +1960,103 @@ internal class LibNunchukAndroid {
 
     @Throws(NCNativeException::class)
     external fun ledgerGetSignPsbtStringResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxCreateSession(
+        sessionId: String,
+        authenticatedBond: Boolean,
+        reportsPerWrite: Int,
+    )
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxInitialize(sessionId: String): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxReconnect(
+        sessionId: String,
+        authenticatedBond: Boolean,
+        reportsPerWrite: Int,
+    ): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxOnDisconnected(sessionId: String)
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxRemoveSession(sessionId: String)
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxConfirmPairing(sessionId: String, accepted: Boolean): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxCancel(sessionId: String): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxGetExtendedPublicKey(
+        sessionId: String,
+        derivationPath: String,
+        checkOnDevice: Boolean,
+    ): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxGetMasterFingerprint(sessionId: String): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxIsWalletRegistered(sessionId: String, wallet: WalletBridge): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxRegisterWallet(sessionId: String, wallet: WalletBridge): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxGetWalletAddress(
+        sessionId: String,
+        wallet: WalletBridge,
+        addressIndex: Int,
+        checkOnDevice: Boolean,
+        change: Boolean,
+    ): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxSignMessage(
+        sessionId: String,
+        derivationPath: String,
+        message: String,
+    ): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxSignPsbt(sessionId: String, wallet: WalletBridge, psbt: String): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxResume(sessionId: String): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxOnData(sessionId: String, data: ByteArray): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxIsInitialized(sessionId: String): Boolean
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxGetDeviceInfo(sessionId: String): BitBoxDeviceInfo
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxGetInitializeResult(sessionId: String): BitBoxInitializeResult
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxGetExtendedPublicKeyResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxGetMasterFingerprintResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxGetRegistrationResult(sessionId: String): Boolean
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxGetWalletAddressResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxGetMessageSignatureResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxGetSignPsbtResult(sessionId: String): String
 
     companion object {
         init {

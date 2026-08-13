@@ -27,12 +27,21 @@ add_library(nunchuk-android SHARED
         tap-protocol-jni.cpp
         satscard-jni.cpp
         ledger-jni.cpp
+        bitbox-jni.cpp
         mk4.cpp
         string-wrapper.h
         group-wallet-jni.cpp
 )
 
-add_subdirectory(libnunchuk)
+set(NUNCHUK_LIBNUNCHUK_DIR "" CACHE PATH "Path to the libnunchuk source tree")
+if(NOT NUNCHUK_LIBNUNCHUK_DIR AND DEFINED ENV{NUNCHUK_LIBNUNCHUK_DIR})
+        set(NUNCHUK_LIBNUNCHUK_DIR "$ENV{NUNCHUK_LIBNUNCHUK_DIR}")
+endif()
+if(NOT NUNCHUK_LIBNUNCHUK_DIR)
+        set(NUNCHUK_LIBNUNCHUK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libnunchuk")
+endif()
+
+add_subdirectory("${NUNCHUK_LIBNUNCHUK_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/libnunchuk-build")
 
 if(TARGET event_core_static AND NOT TARGET libevent::core)
         add_library(libevent::core ALIAS event_core_static)
@@ -45,6 +54,6 @@ target_link_libraries(nunchuk-android nunchuk)
 
 target_include_directories(nunchuk-android PUBLIC
         "${PROJECT_SOURCE_DIR}"
-        "${PROJECT_SOURCE_DIR}/libnunchuk/include"
-        "${PROJECT_SOURCE_DIR}/libnunchuk/src"
+        "${NUNCHUK_LIBNUNCHUK_DIR}/include"
+        "${NUNCHUK_LIBNUNCHUK_DIR}/src"
 )

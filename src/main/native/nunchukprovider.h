@@ -3,6 +3,7 @@
 #include <syslog.h>
 #include <nunchuk.h>
 #include <nunchukmatrix.h>
+#include "utils/bitbox/bitbox_manager.hpp"
 
 using namespace nunchuk;
 
@@ -20,6 +21,7 @@ public:
     std::unique_ptr<Nunchuk> nu;
     std::unique_ptr<Utils> nuUtils;
     std::unique_ptr<NunchukMatrix> nuMatrix;
+    std::unique_ptr<bitbox::BitBoxManager> bitBoxManager;
 
     void initNunchuk(
             const AppSettings &settings,
