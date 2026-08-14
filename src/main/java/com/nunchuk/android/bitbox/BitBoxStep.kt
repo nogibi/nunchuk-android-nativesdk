@@ -8,4 +8,5 @@ data class BitBoxStep(
     val pairingCode: String? = null,
     val warning: String? = null,
     val error: BitBoxError? = null,
+    val progress: Double = 0.0,
 )

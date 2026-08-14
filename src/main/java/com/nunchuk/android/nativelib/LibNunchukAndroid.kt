@@ -23,8 +23,10 @@ import android.nfc.NdefRecord
 import android.nfc.tech.IsoDep
 import com.nunchuk.android.bitbox.BitBoxBackup
 import com.nunchuk.android.bitbox.BitBoxDeviceInfo
+import com.nunchuk.android.bitbox.BitBoxFirmwareInfo
 import com.nunchuk.android.bitbox.BitBoxInitializeResult
 import com.nunchuk.android.bitbox.BitBoxMnemonicLength
+import com.nunchuk.android.bitbox.BitBoxProduct
 import com.nunchuk.android.bitbox.BitBoxStep
 import com.nunchuk.android.bitbox.BitBoxTransport
 import com.nunchuk.android.exception.NCNativeException
@@ -2011,6 +2013,25 @@ internal class LibNunchukAndroid {
         sessionId: String,
         enabled: Boolean,
     ): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxFactoryReset(sessionId: String): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxInspectFirmware(firmware: ByteArray): BitBoxFirmwareInfo
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxEnterFirmwareUpgrade(sessionId: String): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxStartFirmwareUpgrade(
+        sessionId: String,
+        product: BitBoxProduct,
+        firmware: ByteArray,
+    ): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxOnBootloaderData(sessionId: String, data: ByteArray): BitBoxStep
 
     @Throws(NCNativeException::class)
     external fun bitBoxCreateNewSeed(

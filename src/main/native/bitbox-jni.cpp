@@ -12,6 +12,7 @@
 #include "nunchukprovider.h"
 #include "serializer.h"
 #include "string-wrapper.h"
+#include "utils/bitbox/bootloader.hpp"
 #include "utils/bitbox/bitbox_manager.hpp"
 #include "utils/bitbox/bitbox_session.hpp"
 #include "utils/bitbox/types.hpp"
@@ -111,6 +112,8 @@ int stepOrdinal(nunchuk::bitbox::BitBoxStepType type) {
             return 4;
         case nunchuk::bitbox::BitBoxStepType::FAILED:
             return 5;
+        case nunchuk::bitbox::BitBoxStepType::REBOOT:
+            return 6;
         default:
             return 5;
     }
@@ -152,6 +155,10 @@ int interactionOrdinal(nunchuk::bitbox::UserInteraction interaction) {
             return 15;
         case nunchuk::bitbox::UserInteraction::CHECK_BACKUP:
             return 16;
+        case nunchuk::bitbox::UserInteraction::FACTORY_RESET:
+            return 17;
+        case nunchuk::bitbox::UserInteraction::CONFIRM_FIRMWARE_UPGRADE:
+            return 18;
         default:
             return 0;
     }
@@ -171,6 +178,21 @@ int productOrdinal(nunchuk::bitbox::BitBoxProduct product) {
             return 4;
     }
     return 0;
+}
+
+nunchuk::bitbox::BitBoxProduct toBitBoxProduct(JNIEnv *env, jobject product) {
+    switch (enumOrdinal(env, product)) {
+        case 1:
+            return nunchuk::bitbox::BitBoxProduct::NOVA_MULTI;
+        case 2:
+            return nunchuk::bitbox::BitBoxProduct::NOVA_BITCOIN_ONLY;
+        case 3:
+            return nunchuk::bitbox::BitBoxProduct::BITBOX02_MULTI;
+        case 4:
+            return nunchuk::bitbox::BitBoxProduct::BITBOX02_BITCOIN_ONLY;
+        default:
+            return nunchuk::bitbox::BitBoxProduct::UNKNOWN;
+    }
 }
 
 int attestationOrdinal(nunchuk::bitbox::AttestationStatus status) {
@@ -214,7 +236,7 @@ jobject toBitBoxStep(JNIEnv *env, const nunchuk::bitbox::BitBoxStep &step) {
     auto constructor = env->GetMethodID(
             step_class,
             "<init>",
-            "(Lcom/nunchuk/android/bitbox/BitBoxStepType;Lcom/nunchuk/android/bitbox/BitBoxUserInteraction;Ljava/util/List;JLjava/lang/String;Ljava/lang/String;Lcom/nunchuk/android/bitbox/BitBoxError;)V");
+            "(Lcom/nunchuk/android/bitbox/BitBoxStepType;Lcom/nunchuk/android/bitbox/BitBoxUserInteraction;Ljava/util/List;JLjava/lang/String;Ljava/lang/String;Lcom/nunchuk/android/bitbox/BitBoxError;D)V");
     auto type = enumValue(
             env,
             "com/nunchuk/android/bitbox/BitBoxStepType",
@@ -236,7 +258,8 @@ jobject toBitBoxStep(JNIEnv *env, const nunchuk::bitbox::BitBoxStep &step) {
             static_cast<jlong>(step.retry_after_ms),
             pairing_code,
             warning,
-            error);
+            error,
+            static_cast<jdouble>(step.progress.value_or(0.0)));
     env->DeleteLocalRef(type);
     env->DeleteLocalRef(interaction);
     env->DeleteLocalRef(writes);
@@ -244,6 +267,29 @@ jobject toBitBoxStep(JNIEnv *env, const nunchuk::bitbox::BitBoxStep &step) {
     if (warning) env->DeleteLocalRef(warning);
     if (error) env->DeleteLocalRef(error);
     env->DeleteLocalRef(step_class);
+    return result;
+}
+
+jobject toBitBoxFirmwareInfo(
+        JNIEnv *env,
+        const nunchuk::bitbox::BitBoxFirmwareInfo &firmware) {
+    auto info_class = env->FindClass("com/nunchuk/android/bitbox/BitBoxFirmwareInfo");
+    auto constructor = env->GetMethodID(
+            info_class,
+            "<init>",
+            "(Lcom/nunchuk/android/bitbox/BitBoxProduct;JJ)V");
+    auto product = enumValue(
+            env,
+            "com/nunchuk/android/bitbox/BitBoxProduct",
+            productOrdinal(firmware.product));
+    auto result = env->NewObject(
+            info_class,
+            constructor,
+            product,
+            static_cast<jlong>(firmware.monotonic_version),
+            static_cast<jlong>(firmware.firmware_size));
+    env->DeleteLocalRef(product);
+    env->DeleteLocalRef(info_class);
     return result;
 }
 
@@ -425,6 +471,88 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxSetMnemonicPassphrase
     try {
         auto &session = manager().forSession(toString(env, session_id));
         return toBitBoxStep(env, session.setMnemonicPassphraseEnabled(enabled == JNI_TRUE));
+    } catch (const std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxFactoryReset(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id) {
+    try {
+        auto &session = manager().forSession(toString(env, session_id));
+        return toBitBoxStep(env, session.factoryReset());
+    } catch (const std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxInspectFirmware(
+        JNIEnv *env,
+        jobject thiz,
+        jbyteArray firmware) {
+    try {
+        const auto bytes = toBytes(env, firmware);
+        return toBitBoxFirmwareInfo(env, nunchuk::bitbox::InspectFirmware(bytes));
+    } catch (const std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxEnterFirmwareUpgrade(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id) {
+    try {
+        auto &session = manager().forSession(toString(env, session_id));
+        return toBitBoxStep(env, session.enterFirmwareUpgrade());
+    } catch (const std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxStartFirmwareUpgrade(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id,
+        jobject product,
+        jbyteArray firmware) {
+    try {
+        auto &session = manager().forBootloaderSession(
+                toString(env, session_id),
+                toBitBoxProduct(env, product));
+        const auto bytes = toBytes(env, firmware);
+        return toBitBoxStep(env, session.upgradeFirmware(bytes));
+    } catch (const std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxOnBootloaderData(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id,
+        jbyteArray data) {
+    try {
+        auto &session = manager().forBootloaderSession(toString(env, session_id));
+        const auto bytes = toBytes(env, data);
+        return toBitBoxStep(env, session.onData(bytes));
     } catch (const std::exception &e) {
         Deserializer::convertStdException2JException(env, e);
         return nullptr;

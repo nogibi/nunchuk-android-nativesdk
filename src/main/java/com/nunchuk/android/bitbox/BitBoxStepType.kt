@@ -7,4 +7,5 @@ enum class BitBoxStepType {
     AWAITING_USER,
     COMPLETE,
     FAILED,
+    REBOOT,
 }

@@ -31,6 +31,28 @@ class BitBoxNativeClient {
         native.bitBoxSetMnemonicPassphraseEnabled(sessionId, enabled)
 
     @Throws(NCNativeException::class)
+    fun factoryReset(sessionId: String): BitBoxStep = native.bitBoxFactoryReset(sessionId)
+
+    @Throws(NCNativeException::class)
+    fun inspectFirmware(firmware: ByteArray): BitBoxFirmwareInfo =
+        native.bitBoxInspectFirmware(firmware)
+
+    @Throws(NCNativeException::class)
+    fun enterFirmwareUpgrade(sessionId: String): BitBoxStep =
+        native.bitBoxEnterFirmwareUpgrade(sessionId)
+
+    @Throws(NCNativeException::class)
+    fun startFirmwareUpgrade(
+        sessionId: String,
+        product: BitBoxProduct,
+        firmware: ByteArray,
+    ): BitBoxStep = native.bitBoxStartFirmwareUpgrade(sessionId, product, firmware)
+
+    @Throws(NCNativeException::class)
+    fun onBootloaderData(sessionId: String, data: ByteArray): BitBoxStep =
+        native.bitBoxOnBootloaderData(sessionId, data)
+
+    @Throws(NCNativeException::class)
     fun createNewSeed(
         sessionId: String,
         mnemonicLength: BitBoxMnemonicLength = BitBoxMnemonicLength.WORDS_24,
