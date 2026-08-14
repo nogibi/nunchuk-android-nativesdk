@@ -300,7 +300,7 @@ jobject toBitBoxDeviceInfo(
     auto constructor = env->GetMethodID(
             device_class,
             "<init>",
-            "(Lcom/nunchuk/android/bitbox/BitBoxProduct;Ljava/lang/String;Ljava/lang/String;ZZZLjava/lang/String;ZLjava/lang/String;Ljava/lang/String;)V");
+            "(Lcom/nunchuk/android/bitbox/BitBoxProduct;Ljava/lang/String;ZLjava/lang/String;ZZZLjava/lang/String;ZLjava/lang/String;Ljava/lang/String;)V");
     auto product = enumValue(
             env,
             "com/nunchuk/android/bitbox/BitBoxProduct",
@@ -317,6 +317,7 @@ jobject toBitBoxDeviceInfo(
             constructor,
             product,
             firmware_version,
+            static_cast<jboolean>(device.firmware_upgrade_required),
             name,
             static_cast<jboolean>(device.unlocked),
             static_cast<jboolean>(device.initialized),

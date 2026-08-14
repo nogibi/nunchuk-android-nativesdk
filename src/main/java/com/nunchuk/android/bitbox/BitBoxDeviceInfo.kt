@@ -11,6 +11,7 @@ enum class BitBoxProduct {
 data class BitBoxDeviceInfo(
     val product: BitBoxProduct,
     val firmwareVersion: String,
+    val firmwareUpgradeRequired: Boolean,
     val name: String,
     val unlocked: Boolean,
     val initialized: Boolean,
