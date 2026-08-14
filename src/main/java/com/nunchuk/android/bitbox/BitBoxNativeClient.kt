@@ -24,6 +24,13 @@ class BitBoxNativeClient {
         native.bitBoxSetDeviceName(sessionId, name)
 
     @Throws(NCNativeException::class)
+    fun changePassword(sessionId: String): BitBoxStep = native.bitBoxChangePassword(sessionId)
+
+    @Throws(NCNativeException::class)
+    fun setMnemonicPassphraseEnabled(sessionId: String, enabled: Boolean): BitBoxStep =
+        native.bitBoxSetMnemonicPassphraseEnabled(sessionId, enabled)
+
+    @Throws(NCNativeException::class)
     fun createNewSeed(
         sessionId: String,
         mnemonicLength: BitBoxMnemonicLength = BitBoxMnemonicLength.WORDS_24,
@@ -40,6 +47,10 @@ class BitBoxNativeClient {
 
     @Throws(NCNativeException::class)
     fun createBackup(sessionId: String): BitBoxStep = native.bitBoxCreateBackup(sessionId)
+
+    @Throws(NCNativeException::class)
+    fun checkBackup(sessionId: String, silent: Boolean = false): BitBoxStep =
+        native.bitBoxCheckBackup(sessionId, silent)
 
     @Throws(NCNativeException::class)
     fun listBackups(sessionId: String): BitBoxStep = native.bitBoxListBackups(sessionId)
@@ -167,6 +178,10 @@ class BitBoxNativeClient {
     @Throws(NCNativeException::class)
     fun getBackupsResult(sessionId: String): List<BitBoxBackup> =
         native.bitBoxGetBackupsResult(sessionId)
+
+    @Throws(NCNativeException::class)
+    fun getCheckedBackupIdResult(sessionId: String): String =
+        native.bitBoxGetCheckedBackupIdResult(sessionId)
 
     @Throws(NCNativeException::class)
     fun getExtendedPublicKeyResult(sessionId: String): String =

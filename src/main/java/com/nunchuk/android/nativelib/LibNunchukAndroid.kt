@@ -2004,6 +2004,15 @@ internal class LibNunchukAndroid {
     external fun bitBoxSetDeviceName(sessionId: String, name: String): BitBoxStep
 
     @Throws(NCNativeException::class)
+    external fun bitBoxChangePassword(sessionId: String): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxSetMnemonicPassphraseEnabled(
+        sessionId: String,
+        enabled: Boolean,
+    ): BitBoxStep
+
+    @Throws(NCNativeException::class)
     external fun bitBoxCreateNewSeed(
         sessionId: String,
         mnemonicLength: BitBoxMnemonicLength,
@@ -2020,6 +2029,9 @@ internal class LibNunchukAndroid {
 
     @Throws(NCNativeException::class)
     external fun bitBoxCreateBackup(sessionId: String): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxCheckBackup(sessionId: String, silent: Boolean): BitBoxStep
 
     @Throws(NCNativeException::class)
     external fun bitBoxListBackups(sessionId: String): BitBoxStep
@@ -2110,6 +2122,9 @@ internal class LibNunchukAndroid {
 
     @Throws(NCNativeException::class)
     external fun bitBoxGetBackupsResult(sessionId: String): List<BitBoxBackup>
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxGetCheckedBackupIdResult(sessionId: String): String
 
     @Throws(NCNativeException::class)
     external fun bitBoxGetExtendedPublicKeyResult(sessionId: String): String

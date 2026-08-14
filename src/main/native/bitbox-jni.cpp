@@ -146,6 +146,12 @@ int interactionOrdinal(nunchuk::bitbox::UserInteraction interaction) {
             return 12;
         case nunchuk::bitbox::UserInteraction::RESTORE_FROM_BACKUP:
             return 13;
+        case nunchuk::bitbox::UserInteraction::CHANGE_DEVICE_PASSWORD:
+            return 14;
+        case nunchuk::bitbox::UserInteraction::TOGGLE_MNEMONIC_PASSPHRASE:
+            return 15;
+        case nunchuk::bitbox::UserInteraction::CHECK_BACKUP:
+            return 16;
         default:
             return 0;
     }
@@ -396,6 +402,37 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxSetDeviceName(
 
 extern "C"
 JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxChangePassword(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id) {
+    try {
+        auto &session = manager().forSession(toString(env, session_id));
+        return toBitBoxStep(env, session.changePassword());
+    } catch (const std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxSetMnemonicPassphraseEnabled(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id,
+        jboolean enabled) {
+    try {
+        auto &session = manager().forSession(toString(env, session_id));
+        return toBitBoxStep(env, session.setMnemonicPassphraseEnabled(enabled == JNI_TRUE));
+    } catch (const std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
 Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxCreateNewSeed(
         JNIEnv *env,
         jobject thiz,
@@ -467,6 +504,22 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxCreateBackup(
     try {
         auto &session = manager().forSession(toString(env, session_id));
         return toBitBoxStep(env, session.createBackup());
+    } catch (const std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxCheckBackup(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id,
+        jboolean silent) {
+    try {
+        auto &session = manager().forSession(toString(env, session_id));
+        return toBitBoxStep(env, session.checkBackup(silent == JNI_TRUE));
     } catch (const std::exception &e) {
         Deserializer::convertStdException2JException(env, e);
         return nullptr;
@@ -841,6 +894,23 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxGetBackupsResult(
                 .forSession(toString(env, session_id))
                 .result<nunchuk::bitbox::ListBackupsResult>();
         return toBitBoxBackups(env, result.backups);
+    } catch (const std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxGetCheckedBackupIdResult(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id) {
+    try {
+        auto result = manager()
+                .forSession(toString(env, session_id))
+                .result<nunchuk::bitbox::CheckBackupResult>();
+        return env->NewStringUTF(result.backup_id.c_str());
     } catch (const std::exception &e) {
         Deserializer::convertStdException2JException(env, e);
         return nullptr;
