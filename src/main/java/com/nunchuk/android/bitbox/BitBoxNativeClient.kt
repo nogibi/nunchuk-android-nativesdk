@@ -49,6 +49,10 @@ class BitBoxNativeClient {
     ): BitBoxStep = native.bitBoxStartFirmwareUpgrade(sessionId, product, firmware)
 
     @Throws(NCNativeException::class)
+    fun rebootBootloader(sessionId: String, product: BitBoxProduct): BitBoxStep =
+        native.bitBoxRebootBootloader(sessionId, product)
+
+    @Throws(NCNativeException::class)
     fun onBootloaderData(sessionId: String, data: ByteArray): BitBoxStep =
         native.bitBoxOnBootloaderData(sessionId, data)
 

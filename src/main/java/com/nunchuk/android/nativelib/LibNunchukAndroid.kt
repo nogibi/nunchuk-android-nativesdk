@@ -2031,6 +2031,12 @@ internal class LibNunchukAndroid {
     ): BitBoxStep
 
     @Throws(NCNativeException::class)
+    external fun bitBoxRebootBootloader(
+        sessionId: String,
+        product: BitBoxProduct,
+    ): BitBoxStep
+
+    @Throws(NCNativeException::class)
     external fun bitBoxOnBootloaderData(sessionId: String, data: ByteArray): BitBoxStep
 
     @Throws(NCNativeException::class)

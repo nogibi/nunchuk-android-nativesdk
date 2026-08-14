@@ -545,6 +545,24 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxStartFirmwareUpgrade(
 
 extern "C"
 JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxRebootBootloader(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id,
+        jobject product) {
+    try {
+        auto &session = manager().forBootloaderSession(
+                toString(env, session_id),
+                toBitBoxProduct(env, product));
+        return toBitBoxStep(env, session.reboot());
+    } catch (const std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
 Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxOnBootloaderData(
         JNIEnv *env,
         jobject thiz,
