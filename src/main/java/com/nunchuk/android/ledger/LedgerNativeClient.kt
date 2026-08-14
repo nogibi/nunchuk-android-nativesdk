@@ -43,6 +43,17 @@ class LedgerNativeClient {
     ): LedgerStep = native.ledgerRegisterWallet(sessionId, policy)
 
     @Throws(NCNativeException::class)
+    fun registerWallet(
+        sessionId: String,
+        walletContent: String,
+        walletName: String,
+    ): LedgerStep = native.ledgerRegisterWalletContent(
+        sessionId,
+        walletContent,
+        walletName,
+    )
+
+    @Throws(NCNativeException::class)
     fun getWalletAddress(
         sessionId: String,
         wallet: LedgerRegisteredWallet,
@@ -58,11 +69,45 @@ class LedgerNativeClient {
     )
 
     @Throws(NCNativeException::class)
+    fun getWalletAddress(
+        sessionId: String,
+        walletContent: String,
+        walletName: String,
+        walletHmac: String,
+        addressIndex: Int,
+        checkOnDevice: Boolean = false,
+        change: Boolean = false,
+    ): LedgerStep = native.ledgerGetWalletAddressContent(
+        sessionId,
+        walletContent,
+        walletName,
+        walletHmac,
+        addressIndex,
+        checkOnDevice,
+        change,
+    )
+
+    @Throws(NCNativeException::class)
     fun signPsbt(
         sessionId: String,
         psbt: String,
         wallet: LedgerRegisteredWallet,
     ): LedgerStep = native.ledgerSignPsbt(sessionId, psbt, wallet)
+
+    @Throws(NCNativeException::class)
+    fun signPsbt(
+        sessionId: String,
+        psbt: String,
+        walletContent: String,
+        walletName: String,
+        walletHmac: String,
+    ): LedgerStep = native.ledgerSignPsbtContent(
+        sessionId,
+        psbt,
+        walletContent,
+        walletName,
+        walletHmac,
+    )
 
     @Throws(NCNativeException::class)
     fun resume(sessionId: String): LedgerStep = native.ledgerResume(sessionId)

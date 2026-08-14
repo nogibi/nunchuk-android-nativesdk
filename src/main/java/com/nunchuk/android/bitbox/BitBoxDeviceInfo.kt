@@ -4,6 +4,8 @@ enum class BitBoxProduct {
     UNKNOWN,
     NOVA_MULTI,
     NOVA_BITCOIN_ONLY,
+    BITBOX02_MULTI,
+    BITBOX02_BITCOIN_ONLY,
 }
 
 data class BitBoxDeviceInfo(

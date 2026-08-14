@@ -21,9 +21,12 @@ package com.nunchuk.android.nativelib
 
 import android.nfc.NdefRecord
 import android.nfc.tech.IsoDep
+import com.nunchuk.android.bitbox.BitBoxBackup
 import com.nunchuk.android.bitbox.BitBoxDeviceInfo
 import com.nunchuk.android.bitbox.BitBoxInitializeResult
+import com.nunchuk.android.bitbox.BitBoxMnemonicLength
 import com.nunchuk.android.bitbox.BitBoxStep
+import com.nunchuk.android.bitbox.BitBoxTransport
 import com.nunchuk.android.exception.NCNativeException
 import com.nunchuk.android.ledger.LedgerRegisteredWallet
 import com.nunchuk.android.ledger.LedgerRegisteredWalletResult
@@ -1922,9 +1925,27 @@ internal class LibNunchukAndroid {
     ): LedgerStep
 
     @Throws(NCNativeException::class)
+    external fun ledgerRegisterWalletContent(
+        sessionId: String,
+        walletContent: String,
+        walletName: String,
+    ): LedgerStep
+
+    @Throws(NCNativeException::class)
     external fun ledgerGetWalletAddress(
         sessionId: String,
         wallet: LedgerRegisteredWallet,
+        addressIndex: Int,
+        checkOnDevice: Boolean,
+        change: Boolean,
+    ): LedgerStep
+
+    @Throws(NCNativeException::class)
+    external fun ledgerGetWalletAddressContent(
+        sessionId: String,
+        walletContent: String,
+        walletName: String,
+        walletHmac: String,
         addressIndex: Int,
         checkOnDevice: Boolean,
         change: Boolean,
@@ -1935,6 +1956,15 @@ internal class LibNunchukAndroid {
         sessionId: String,
         psbt: String,
         wallet: LedgerRegisteredWallet,
+    ): LedgerStep
+
+    @Throws(NCNativeException::class)
+    external fun ledgerSignPsbtContent(
+        sessionId: String,
+        psbt: String,
+        walletContent: String,
+        walletName: String,
+        walletHmac: String,
     ): LedgerStep
 
     @Throws(NCNativeException::class)
@@ -1964,31 +1994,41 @@ internal class LibNunchukAndroid {
     @Throws(NCNativeException::class)
     external fun bitBoxCreateSession(
         sessionId: String,
-        authenticatedBond: Boolean,
-        reportsPerWrite: Int,
-    )
-
-    @Throws(NCNativeException::class)
-    external fun bitBoxInitialize(sessionId: String): BitBoxStep
-
-    @Throws(NCNativeException::class)
-    external fun bitBoxReconnect(
-        sessionId: String,
-        authenticatedBond: Boolean,
-        reportsPerWrite: Int,
+        transport: BitBoxTransport,
     ): BitBoxStep
-
-    @Throws(NCNativeException::class)
-    external fun bitBoxOnDisconnected(sessionId: String)
-
-    @Throws(NCNativeException::class)
-    external fun bitBoxRemoveSession(sessionId: String)
 
     @Throws(NCNativeException::class)
     external fun bitBoxConfirmPairing(sessionId: String, accepted: Boolean): BitBoxStep
 
     @Throws(NCNativeException::class)
-    external fun bitBoxCancel(sessionId: String): BitBoxStep
+    external fun bitBoxSetDeviceName(sessionId: String, name: String): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxCreateNewSeed(
+        sessionId: String,
+        mnemonicLength: BitBoxMnemonicLength,
+    ): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxShowMnemonic(sessionId: String): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxCheckSdCard(sessionId: String): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxInsertSdCard(sessionId: String): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxCreateBackup(sessionId: String): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxListBackups(sessionId: String): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxRestoreBackup(sessionId: String, id: String): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxRestoreFromMnemonic(sessionId: String): BitBoxStep
 
     @Throws(NCNativeException::class)
     external fun bitBoxGetExtendedPublicKey(
@@ -2007,9 +2047,26 @@ internal class LibNunchukAndroid {
     external fun bitBoxRegisterWallet(sessionId: String, wallet: WalletBridge): BitBoxStep
 
     @Throws(NCNativeException::class)
+    external fun bitBoxRegisterWalletContent(
+        sessionId: String,
+        walletContent: String,
+        walletName: String,
+    ): BitBoxStep
+
+    @Throws(NCNativeException::class)
     external fun bitBoxGetWalletAddress(
         sessionId: String,
         wallet: WalletBridge,
+        addressIndex: Int,
+        checkOnDevice: Boolean,
+        change: Boolean,
+    ): BitBoxStep
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxGetWalletAddressContent(
+        sessionId: String,
+        walletContent: String,
+        walletName: String,
         addressIndex: Int,
         checkOnDevice: Boolean,
         change: Boolean,
@@ -2026,6 +2083,14 @@ internal class LibNunchukAndroid {
     external fun bitBoxSignPsbt(sessionId: String, wallet: WalletBridge, psbt: String): BitBoxStep
 
     @Throws(NCNativeException::class)
+    external fun bitBoxSignPsbtContent(
+        sessionId: String,
+        walletContent: String,
+        walletName: String,
+        psbt: String,
+    ): BitBoxStep
+
+    @Throws(NCNativeException::class)
     external fun bitBoxResume(sessionId: String): BitBoxStep
 
     @Throws(NCNativeException::class)
@@ -2039,6 +2104,12 @@ internal class LibNunchukAndroid {
 
     @Throws(NCNativeException::class)
     external fun bitBoxGetInitializeResult(sessionId: String): BitBoxInitializeResult
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxGetSdCardInsertedResult(sessionId: String): Boolean
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxGetBackupsResult(sessionId: String): List<BitBoxBackup>
 
     @Throws(NCNativeException::class)
     external fun bitBoxGetExtendedPublicKeyResult(sessionId: String): String

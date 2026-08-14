@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include <nunchuk.h>
+
 #include "deserializer.h"
 #include "serializer.h"
 #include "string-wrapper.h"
@@ -18,6 +20,15 @@ nunchuk::ledger::LedgerManager g_ledger_manager;
 
 std::string toString(JNIEnv *env, jstring value) {
     return StringWrapper(env, value);
+}
+
+nunchuk::Wallet parseWalletContent(
+        JNIEnv *env,
+        jstring wallet_content,
+        jstring wallet_name) {
+    auto wallet = nunchuk::Utils::ParseWalletDescriptor(toString(env, wallet_content));
+    wallet.set_name(toString(env, wallet_name));
+    return wallet;
 }
 
 jobject enumValue(JNIEnv *env, const char *class_name, int ordinal) {
@@ -368,6 +379,26 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerRegisterWallet(
 
 extern "C"
 JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerRegisterWalletContent(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id,
+        jstring wallet_content,
+        jstring wallet_name) {
+    try {
+        auto &session = g_ledger_manager.forSession(toString(env, session_id));
+        return toLedgerStep(
+                env,
+                session.registerWallet(
+                        parseWalletContent(env, wallet_content, wallet_name)));
+    } catch (std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
 Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetWalletAddress(
         JNIEnv *env,
         jobject thiz,
@@ -396,6 +427,42 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetWalletAddress(
 
 extern "C"
 JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerGetWalletAddressContent(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id,
+        jstring wallet_content,
+        jstring wallet_name,
+        jstring wallet_hmac,
+        jint address_index,
+        jboolean check_on_device,
+        jboolean change) {
+    try {
+        if (address_index < 0) {
+            throw std::invalid_argument("Address index must be non-negative");
+        }
+        nunchuk::ledger::WalletAddressOptions options;
+        options.check_on_device = check_on_device == JNI_TRUE;
+        options.change = change == JNI_TRUE;
+        auto wallet = parseWalletContent(env, wallet_content, wallet_name);
+        auto registered_wallet = nunchuk::ledger::RegisteredWallet(
+                wallet,
+                toString(env, wallet_hmac));
+        auto &session = g_ledger_manager.forSession(toString(env, session_id));
+        return toLedgerStep(
+                env,
+                session.getWalletAddress(
+                        registered_wallet,
+                        static_cast<uint32_t>(address_index),
+                        options));
+    } catch (std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
 Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerSignPsbt(
         JNIEnv *env,
         jobject thiz,
@@ -407,6 +474,31 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerSignPsbt(
         return toLedgerStep(env, session.signPsbt(
                 toRegisteredWallet(env, wallet),
                 toString(env, psbt)));
+    } catch (std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_ledgerSignPsbtContent(
+        JNIEnv *env,
+        jobject thiz,
+        jstring session_id,
+        jstring psbt,
+        jstring wallet_content,
+        jstring wallet_name,
+        jstring wallet_hmac) {
+    try {
+        auto wallet = parseWalletContent(env, wallet_content, wallet_name);
+        auto registered_wallet = nunchuk::ledger::RegisteredWallet(
+                wallet,
+                toString(env, wallet_hmac));
+        auto &session = g_ledger_manager.forSession(toString(env, session_id));
+        return toLedgerStep(
+                env,
+                session.signPsbt(registered_wallet, toString(env, psbt)));
     } catch (std::exception &e) {
         Deserializer::convertStdException2JException(env, e);
         return nullptr;

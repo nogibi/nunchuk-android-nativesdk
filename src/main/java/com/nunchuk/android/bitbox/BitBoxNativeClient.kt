@@ -12,32 +12,45 @@ class BitBoxNativeClient {
     @Throws(NCNativeException::class)
     fun createSession(
         sessionId: String,
-        authenticatedBond: Boolean,
-        reportsPerWrite: Int = 1,
-    ) = native.bitBoxCreateSession(sessionId, authenticatedBond, reportsPerWrite)
-
-    @Throws(NCNativeException::class)
-    fun initialize(sessionId: String): BitBoxStep = native.bitBoxInitialize(sessionId)
-
-    @Throws(NCNativeException::class)
-    fun reconnect(
-        sessionId: String,
-        authenticatedBond: Boolean,
-        reportsPerWrite: Int = 1,
-    ): BitBoxStep = native.bitBoxReconnect(sessionId, authenticatedBond, reportsPerWrite)
-
-    @Throws(NCNativeException::class)
-    fun onDisconnected(sessionId: String) = native.bitBoxOnDisconnected(sessionId)
-
-    @Throws(NCNativeException::class)
-    fun removeSession(sessionId: String) = native.bitBoxRemoveSession(sessionId)
+        transport: BitBoxTransport,
+    ): BitBoxStep = native.bitBoxCreateSession(sessionId, transport)
 
     @Throws(NCNativeException::class)
     fun confirmPairing(sessionId: String, accepted: Boolean): BitBoxStep =
         native.bitBoxConfirmPairing(sessionId, accepted)
 
     @Throws(NCNativeException::class)
-    fun cancel(sessionId: String): BitBoxStep = native.bitBoxCancel(sessionId)
+    fun setDeviceName(sessionId: String, name: String): BitBoxStep =
+        native.bitBoxSetDeviceName(sessionId, name)
+
+    @Throws(NCNativeException::class)
+    fun createNewSeed(
+        sessionId: String,
+        mnemonicLength: BitBoxMnemonicLength = BitBoxMnemonicLength.WORDS_24,
+    ): BitBoxStep = native.bitBoxCreateNewSeed(sessionId, mnemonicLength)
+
+    @Throws(NCNativeException::class)
+    fun showMnemonic(sessionId: String): BitBoxStep = native.bitBoxShowMnemonic(sessionId)
+
+    @Throws(NCNativeException::class)
+    fun checkSdCard(sessionId: String): BitBoxStep = native.bitBoxCheckSdCard(sessionId)
+
+    @Throws(NCNativeException::class)
+    fun insertSdCard(sessionId: String): BitBoxStep = native.bitBoxInsertSdCard(sessionId)
+
+    @Throws(NCNativeException::class)
+    fun createBackup(sessionId: String): BitBoxStep = native.bitBoxCreateBackup(sessionId)
+
+    @Throws(NCNativeException::class)
+    fun listBackups(sessionId: String): BitBoxStep = native.bitBoxListBackups(sessionId)
+
+    @Throws(NCNativeException::class)
+    fun restoreBackup(sessionId: String, id: String): BitBoxStep =
+        native.bitBoxRestoreBackup(sessionId, id)
+
+    @Throws(NCNativeException::class)
+    fun restoreFromMnemonic(sessionId: String): BitBoxStep =
+        native.bitBoxRestoreFromMnemonic(sessionId)
 
     @Throws(NCNativeException::class)
     fun getExtendedPublicKey(
@@ -63,6 +76,17 @@ class BitBoxNativeClient {
         native.bitBoxRegisterWallet(sessionId, wallet.toBridge())
 
     @Throws(NCNativeException::class)
+    fun registerWallet(
+        sessionId: String,
+        walletContent: String,
+        walletName: String,
+    ): BitBoxStep = native.bitBoxRegisterWalletContent(
+        sessionId,
+        walletContent,
+        walletName,
+    )
+
+    @Throws(NCNativeException::class)
     fun getWalletAddress(
         sessionId: String,
         wallet: Wallet,
@@ -78,6 +102,23 @@ class BitBoxNativeClient {
     )
 
     @Throws(NCNativeException::class)
+    fun getWalletAddress(
+        sessionId: String,
+        walletContent: String,
+        walletName: String,
+        addressIndex: Int,
+        checkOnDevice: Boolean = true,
+        change: Boolean = false,
+    ): BitBoxStep = native.bitBoxGetWalletAddressContent(
+        sessionId,
+        walletContent,
+        walletName,
+        addressIndex,
+        checkOnDevice,
+        change,
+    )
+
+    @Throws(NCNativeException::class)
     fun signMessage(
         sessionId: String,
         derivationPath: String,
@@ -87,6 +128,19 @@ class BitBoxNativeClient {
     @Throws(NCNativeException::class)
     fun signPsbt(sessionId: String, wallet: Wallet, psbt: String): BitBoxStep =
         native.bitBoxSignPsbt(sessionId, wallet.toBridge(), psbt)
+
+    @Throws(NCNativeException::class)
+    fun signPsbt(
+        sessionId: String,
+        walletContent: String,
+        walletName: String,
+        psbt: String,
+    ): BitBoxStep = native.bitBoxSignPsbtContent(
+        sessionId,
+        walletContent,
+        walletName,
+        psbt,
+    )
 
     @Throws(NCNativeException::class)
     fun resume(sessionId: String): BitBoxStep = native.bitBoxResume(sessionId)
@@ -105,6 +159,14 @@ class BitBoxNativeClient {
     @Throws(NCNativeException::class)
     fun getInitializeResult(sessionId: String): BitBoxInitializeResult =
         native.bitBoxGetInitializeResult(sessionId)
+
+    @Throws(NCNativeException::class)
+    fun getSdCardInsertedResult(sessionId: String): Boolean =
+        native.bitBoxGetSdCardInsertedResult(sessionId)
+
+    @Throws(NCNativeException::class)
+    fun getBackupsResult(sessionId: String): List<BitBoxBackup> =
+        native.bitBoxGetBackupsResult(sessionId)
 
     @Throws(NCNativeException::class)
     fun getExtendedPublicKeyResult(sessionId: String): String =
