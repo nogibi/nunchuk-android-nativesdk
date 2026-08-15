@@ -1,6 +1,7 @@
 package com.nunchuk.android.bitbox
 
 import com.nunchuk.android.exception.NCNativeException
+import com.nunchuk.android.model.SingleSigner
 import com.nunchuk.android.model.Wallet
 import com.nunchuk.android.model.bridge.toBridge
 import com.nunchuk.android.nativelib.LibNunchukAndroid
@@ -154,6 +155,13 @@ class BitBoxNativeClient {
         checkOnDevice,
         change,
     )
+
+    @Throws(NCNativeException::class)
+    fun getSignMessagePath(signer: SingleSigner): String = native.bitBoxGetSignMessagePath(signer)
+
+    @Throws(NCNativeException::class)
+    fun getSignMessageAddress(signer: SingleSigner): String =
+        native.bitBoxGetSignMessageAddress(signer)
 
     @Throws(NCNativeException::class)
     fun signMessage(

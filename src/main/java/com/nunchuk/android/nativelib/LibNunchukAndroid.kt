@@ -2112,6 +2112,12 @@ internal class LibNunchukAndroid {
     ): BitBoxStep
 
     @Throws(NCNativeException::class)
+    external fun bitBoxGetSignMessagePath(signer: SingleSigner): String
+
+    @Throws(NCNativeException::class)
+    external fun bitBoxGetSignMessageAddress(signer: SingleSigner): String
+
+    @Throws(NCNativeException::class)
     external fun bitBoxSignMessage(
         sessionId: String,
         derivationPath: String,

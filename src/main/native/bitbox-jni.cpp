@@ -12,10 +12,7 @@
 #include "nunchukprovider.h"
 #include "serializer.h"
 #include "string-wrapper.h"
-#include "utils/bitbox/bootloader.hpp"
-#include "utils/bitbox/bitbox_manager.hpp"
-#include "utils/bitbox/bitbox_session.hpp"
-#include "utils/bitbox/types.hpp"
+#include "utils/bitbox/bitbox.hpp"
 
 namespace {
 
@@ -236,7 +233,7 @@ jobject toBitBoxStep(JNIEnv *env, const nunchuk::bitbox::BitBoxStep &step) {
     auto constructor = env->GetMethodID(
             step_class,
             "<init>",
-            "(Lcom/nunchuk/android/bitbox/BitBoxStepType;Lcom/nunchuk/android/bitbox/BitBoxUserInteraction;Ljava/util/List;JLjava/lang/String;Ljava/lang/String;Lcom/nunchuk/android/bitbox/BitBoxError;D)V");
+            "(Lcom/nunchuk/android/bitbox/BitBoxStepType;Lcom/nunchuk/android/bitbox/BitBoxUserInteraction;Ljava/util/List;JLjava/lang/String;Lcom/nunchuk/android/bitbox/BitBoxError;D)V");
     auto type = enumValue(
             env,
             "com/nunchuk/android/bitbox/BitBoxStepType",
@@ -247,7 +244,6 @@ jobject toBitBoxStep(JNIEnv *env, const nunchuk::bitbox::BitBoxStep &step) {
             interactionOrdinal(step.interaction));
     auto writes = toWriteList(env, step.writes);
     auto pairing_code = toOptionalString(env, step.pairing_code);
-    auto warning = toOptionalString(env, step.warning);
     auto error = toBitBoxError(env, step.error);
     auto result = env->NewObject(
             step_class,
@@ -257,14 +253,12 @@ jobject toBitBoxStep(JNIEnv *env, const nunchuk::bitbox::BitBoxStep &step) {
             writes,
             static_cast<jlong>(step.retry_after_ms),
             pairing_code,
-            warning,
             error,
             static_cast<jdouble>(step.progress.value_or(0.0)));
     env->DeleteLocalRef(type);
     env->DeleteLocalRef(interaction);
     env->DeleteLocalRef(writes);
     if (pairing_code) env->DeleteLocalRef(pairing_code);
-    if (warning) env->DeleteLocalRef(warning);
     if (error) env->DeleteLocalRef(error);
     env->DeleteLocalRef(step_class);
     return result;
@@ -864,6 +858,38 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxGetWalletAddressConte
                         parseWalletContent(env, wallet_content, wallet_name),
                         static_cast<uint32_t>(address_index),
                         options));
+    } catch (const std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxGetSignMessagePath(
+        JNIEnv *env,
+        jobject thiz,
+        jobject signer) {
+    try {
+        const auto path = nunchuk::bitbox::GetBitBoxSignMessagePath(
+                Serializer::convert2CSigner(env, signer));
+        return env->NewStringUTF(path.c_str());
+    } catch (const std::exception &e) {
+        Deserializer::convertStdException2JException(env, e);
+        return nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxGetSignMessageAddress(
+        JNIEnv *env,
+        jobject thiz,
+        jobject signer) {
+    try {
+        const auto address = nunchuk::bitbox::GetBitBoxSignMessageAddress(
+                Serializer::convert2CSigner(env, signer));
+        return env->NewStringUTF(address.c_str());
     } catch (const std::exception &e) {
         Deserializer::convertStdException2JException(env, e);
         return nullptr;

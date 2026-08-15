@@ -6,7 +6,6 @@ data class BitBoxStep(
     val writes: List<ByteArray> = emptyList(),
     val retryAfterMs: Long = 0,
     val pairingCode: String? = null,
-    val warning: String? = null,
     val error: BitBoxError? = null,
     val progress: Double = 0.0,
 )
