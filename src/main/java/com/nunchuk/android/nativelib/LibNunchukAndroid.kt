@@ -2021,7 +2021,10 @@ internal class LibNunchukAndroid {
     external fun bitBoxInspectFirmware(firmware: ByteArray): BitBoxFirmwareInfo
 
     @Throws(NCNativeException::class)
-    external fun bitBoxEnterFirmwareUpgrade(sessionId: String): BitBoxStep
+    external fun bitBoxEnterFirmwareUpgrade(
+        sessionId: String,
+        firmware: ByteArray,
+    ): BitBoxStep
 
     @Throws(NCNativeException::class)
     external fun bitBoxStartFirmwareUpgrade(

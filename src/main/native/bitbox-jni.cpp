@@ -507,10 +507,12 @@ JNIEXPORT jobject JNICALL
 Java_com_nunchuk_android_nativelib_LibNunchukAndroid_bitBoxEnterFirmwareUpgrade(
         JNIEnv *env,
         jobject thiz,
-        jstring session_id) {
+        jstring session_id,
+        jbyteArray firmware) {
     try {
         auto &session = manager().forSession(toString(env, session_id));
-        return toBitBoxStep(env, session.enterFirmwareUpgrade());
+        const auto bytes = toBytes(env, firmware);
+        return toBitBoxStep(env, session.enterFirmwareUpgrade(bytes));
     } catch (const std::exception &e) {
         Deserializer::convertStdException2JException(env, e);
         return nullptr;

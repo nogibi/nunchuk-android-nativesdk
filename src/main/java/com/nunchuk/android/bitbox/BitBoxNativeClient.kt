@@ -39,8 +39,8 @@ class BitBoxNativeClient {
         native.bitBoxInspectFirmware(firmware)
 
     @Throws(NCNativeException::class)
-    fun enterFirmwareUpgrade(sessionId: String): BitBoxStep =
-        native.bitBoxEnterFirmwareUpgrade(sessionId)
+    fun enterFirmwareUpgrade(sessionId: String, firmware: ByteArray): BitBoxStep =
+        native.bitBoxEnterFirmwareUpgrade(sessionId, firmware)
 
     @Throws(NCNativeException::class)
     fun startFirmwareUpgrade(
