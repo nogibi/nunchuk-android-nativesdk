@@ -30,6 +30,8 @@ import com.nunchuk.android.bitbox.BitBoxProduct
 import com.nunchuk.android.bitbox.BitBoxStep
 import com.nunchuk.android.bitbox.BitBoxTransport
 import com.nunchuk.android.exception.NCNativeException
+import com.nunchuk.android.jade.JadeDeviceInfo
+import com.nunchuk.android.jade.JadeStep
 import com.nunchuk.android.ledger.LedgerRegisteredWallet
 import com.nunchuk.android.ledger.LedgerRegisteredWalletResult
 import com.nunchuk.android.ledger.LedgerStep
@@ -2179,6 +2181,103 @@ internal class LibNunchukAndroid {
 
     @Throws(NCNativeException::class)
     external fun bitBoxGetSignPsbtResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun jadeCreateSession(sessionId: String, maxWriteSize: Int): JadeStep
+
+    @Throws(NCNativeException::class)
+    external fun jadeConfirmCustomPinServer(sessionId: String, accepted: Boolean): JadeStep
+
+    @Throws(NCNativeException::class)
+    external fun jadeGetVersionInfo(sessionId: String): JadeStep
+
+    @Throws(NCNativeException::class)
+    external fun jadeGetExtendedPublicKey(sessionId: String, derivationPath: String): JadeStep
+
+    @Throws(NCNativeException::class)
+    external fun jadeGetMasterFingerprint(sessionId: String): JadeStep
+
+    @Throws(NCNativeException::class)
+    external fun jadeIsWalletRegistered(sessionId: String, wallet: WalletBridge): JadeStep
+
+    @Throws(NCNativeException::class)
+    external fun jadeIsWalletRegisteredContent(
+        sessionId: String,
+        walletContent: String,
+        walletName: String,
+    ): JadeStep
+
+    @Throws(NCNativeException::class)
+    external fun jadeRegisterWallet(sessionId: String, wallet: WalletBridge): JadeStep
+
+    @Throws(NCNativeException::class)
+    external fun jadeRegisterWalletContent(
+        sessionId: String,
+        walletContent: String,
+        walletName: String,
+    ): JadeStep
+
+    @Throws(NCNativeException::class)
+    external fun jadeGetWalletAddress(
+        sessionId: String,
+        wallet: WalletBridge,
+        addressIndex: Int,
+        change: Boolean,
+    ): JadeStep
+
+    @Throws(NCNativeException::class)
+    external fun jadeGetWalletAddressContent(
+        sessionId: String,
+        walletContent: String,
+        walletName: String,
+        addressIndex: Int,
+        change: Boolean,
+    ): JadeStep
+
+    @Throws(NCNativeException::class)
+    external fun jadeSignMessage(
+        sessionId: String,
+        derivationPath: String,
+        message: String,
+    ): JadeStep
+
+    @Throws(NCNativeException::class)
+    external fun jadeSignPsbt(sessionId: String, wallet: WalletBridge, psbt: String): JadeStep
+
+    @Throws(NCNativeException::class)
+    external fun jadeSignPsbtContent(
+        sessionId: String,
+        walletContent: String,
+        walletName: String,
+        psbt: String,
+    ): JadeStep
+
+    @Throws(NCNativeException::class)
+    external fun jadeOnData(sessionId: String, data: ByteArray): JadeStep
+
+    @Throws(NCNativeException::class)
+    external fun jadeIsInitialized(sessionId: String): Boolean
+
+    @Throws(NCNativeException::class)
+    external fun jadeGetDeviceInfo(sessionId: String): JadeDeviceInfo
+
+    @Throws(NCNativeException::class)
+    external fun jadeGetExtendedPublicKeyResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun jadeGetMasterFingerprintResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun jadeGetRegistrationResult(sessionId: String): Boolean
+
+    @Throws(NCNativeException::class)
+    external fun jadeGetWalletAddressResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun jadeGetMessageSignatureResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun jadeGetSignPsbtResult(sessionId: String): String
 
     companion object {
         init {
