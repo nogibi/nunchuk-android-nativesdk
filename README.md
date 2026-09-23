@@ -75,3 +75,31 @@ export ANDROID_NDK_HOME=$HOME/Android/Sdk/ndk/27.2.12479018
 ./gradlew clean assembleArmRelease --stacktrace
 ./gradlew publish
 ```
+
+
+## Satochip
+
+`com.nunchuk.android.satochip.SatochipNativeClient` bridges libnunchuk's Satochip
+master-signer and PSBT APIs. Initialize `NunchukNativeSdk` first. Supply a
+`SatochipCard` adapter backed by the Satochip Java library and run each complete
+operation synchronously off the UI thread, with exclusive access to one
+PIN-authenticated card session. The adapter must throw on APDU/transport errors;
+`getExtendedKey` must derive on the card even when an xpub is already cached.
+
+- `createMasterSigner` registers the card and caches default xpubs.
+- `addMasterSigner` creates metadata from a fingerprint/name without a card, for sync.
+- `getSigner` returns a cached xpub or reads and saves a custom-path xpub.
+- `cacheMasterSignerXpubs` refills the registered signer's cache.
+- `importSeed` applies UTF-8 NFKD normalization before libnunchuk derives the BIP39 seed.
+- `signPsbt` accepts a `Wallet` or BSMS/descriptor content. Libnunchuk persists and
+  atomically consumes the card-encrypted MuSig2 nonces.
+
+The adapter owns firmware/policy checks and per-hash 2FA authorization, if used.
+Its `importSeed` implementation must clear the supplied seed bytes in a `finally`
+block. Callbacks are not retained after the native call returns.
+
+The NFC example adapter/UI lives at
+`/mnt/sda7/ledger-utils/ledger-example/ledger-android`. The SDK does not bundle the
+Satochip Java library. Build against the Satochip-enabled libnunchuk tree using
+`NUNCHUK_LIBNUNCHUK_DIR=/mnt/sda7/integrate-satochip/libnunchuk`; the bundled
+submodule is left unchanged.

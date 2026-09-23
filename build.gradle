@@ -33,6 +33,7 @@ android {
     namespace "com.nunchuk.android.nativesdk"
     compileSdkVersion androidConfig.compileSdkVersion
     defaultConfig {
+        consumerProguardFiles "configs/satochip-consumer-rules.pro"
         minSdkVersion androidConfig.minSdkVersion
         targetSdkVersion androidConfig.targetSdkVersion
         externalNativeBuild {

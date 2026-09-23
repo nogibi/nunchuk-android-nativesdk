@@ -32,5 +32,6 @@ enum class SignerType {
     COLDCARD_NFC,
     SERVER,
     PORTAL_NFC,
-    PLATFORM
+    PLATFORM,
+    SATOCHIP_NFC
 }

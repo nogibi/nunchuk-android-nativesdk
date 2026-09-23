@@ -76,6 +76,7 @@ import com.nunchuk.android.model.TxInput
 import com.nunchuk.android.model.UnspentOutput
 import com.nunchuk.android.model.Wallet
 import com.nunchuk.android.model.bridge.WalletBridge
+import com.nunchuk.android.satochip.SatochipCard
 import com.nunchuk.android.type.HealthStatus
 import com.nunchuk.android.type.MiniscriptTimelockBased
 import com.nunchuk.android.type.SignerTag
@@ -84,6 +85,14 @@ import com.nunchuk.android.type.SignerType
 internal const val LIB_NAME = "nunchuk-android"
 
 internal class LibNunchukAndroid {
+    external fun satochipGetMasterFingerprint(card: SatochipCard): String
+    external fun satochipAddMasterSigner(fingerprint: String, name: String)
+    external fun satochipCreateMasterSigner(card: SatochipCard, name: String): MasterSigner
+    external fun satochipCacheMasterSignerXpubs(card: SatochipCard, masterSignerId: String)
+    external fun satochipGetSigner(card: SatochipCard, masterSignerId: String, path: String): SingleSigner
+    external fun satochipImportSeed(card: SatochipCard, mnemonic: ByteArray, passphrase: ByteArray)
+    external fun satochipSignPsbt(card: SatochipCard, wallet: WalletBridge, psbt: String): String
+    external fun satochipSignPsbtContent(card: SatochipCard, walletContent: String, walletName: String, psbt: String): String
 
     @Throws(NCNativeException::class)
     external fun initNunchuk(

@@ -29,6 +29,7 @@ add_library(nunchuk-android SHARED
         ledger-jni.cpp
         bitbox-jni.cpp
         jade-jni.cpp
+        satochip-jni.cpp
         mk4.cpp
         string-wrapper.h
         group-wallet-jni.cpp
