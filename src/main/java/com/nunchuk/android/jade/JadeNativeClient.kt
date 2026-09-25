@@ -7,7 +7,7 @@ import com.nunchuk.android.nativelib.LibNunchukAndroid
 
 /**
  * Requires [com.nunchuk.android.nativelib.NunchukNativeSdk.initNunchuk] first.
- * Call [createSession], [onData], and [confirmCustomPinServer] off the UI thread
+ * Call [createSession] and [onData] off the UI thread
  * because Jade PIN-server HTTP is handled synchronously inside libnunchuk.
  */
 class JadeNativeClient {
@@ -16,10 +16,6 @@ class JadeNativeClient {
     @Throws(NCNativeException::class)
     fun createSession(sessionId: String, maxWriteSize: Int): JadeStep =
         native.jadeCreateSession(sessionId, maxWriteSize)
-
-    @Throws(NCNativeException::class)
-    fun confirmCustomPinServer(sessionId: String, accepted: Boolean): JadeStep =
-        native.jadeConfirmCustomPinServer(sessionId, accepted)
 
     @Throws(NCNativeException::class)
     fun getVersionInfo(sessionId: String): JadeStep = native.jadeGetVersionInfo(sessionId)

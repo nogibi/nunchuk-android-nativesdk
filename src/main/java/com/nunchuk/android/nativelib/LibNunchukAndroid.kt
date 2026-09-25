@@ -2196,9 +2196,6 @@ internal class LibNunchukAndroid {
     external fun jadeCreateSession(sessionId: String, maxWriteSize: Int): JadeStep
 
     @Throws(NCNativeException::class)
-    external fun jadeConfirmCustomPinServer(sessionId: String, accepted: Boolean): JadeStep
-
-    @Throws(NCNativeException::class)
     external fun jadeGetVersionInfo(sessionId: String): JadeStep
 
     @Throws(NCNativeException::class)

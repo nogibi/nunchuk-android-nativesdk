@@ -95,34 +95,18 @@ jobject toWriteList(
     return list;
 }
 
-jobject toStringList(JNIEnv *env, const std::vector<std::string> &values) {
-    auto list_class = env->FindClass("java/util/ArrayList");
-    auto constructor = env->GetMethodID(list_class, "<init>", "()V");
-    auto add_method = env->GetMethodID(list_class, "add", "(Ljava/lang/Object;)Z");
-    auto list = env->NewObject(list_class, constructor);
-    for (const auto &value: values) {
-        auto string = env->NewStringUTF(value.c_str());
-        env->CallBooleanMethod(list, add_method, string);
-        env->DeleteLocalRef(string);
-    }
-    env->DeleteLocalRef(list_class);
-    return list;
-}
-
 int stepOrdinal(nunchuk::jade::JadeStepType type) {
     switch (type) {
         case nunchuk::jade::JadeStepType::WRITE:
             return 0;
         case nunchuk::jade::JadeStepType::READ_MORE:
             return 1;
-        case nunchuk::jade::JadeStepType::CUSTOM_SERVER_APPROVAL:
-            return 2;
         case nunchuk::jade::JadeStepType::COMPLETE:
-            return 3;
+            return 2;
         case nunchuk::jade::JadeStepType::FAILED:
-            return 4;
+            return 3;
     }
-    return 4;
+    return 3;
 }
 
 int interactionOrdinal(nunchuk::jade::UserInteraction interaction) {
@@ -141,8 +125,6 @@ int interactionOrdinal(nunchuk::jade::UserInteraction interaction) {
             return 5;
         case nunchuk::jade::UserInteraction::SIGN_TRANSACTION:
             return 6;
-        case nunchuk::jade::UserInteraction::APPROVE_PINSERVER:
-            return 7;
     }
     return 0;
 }
@@ -171,34 +153,12 @@ jobject toJadeError(JNIEnv *env, const std::optional<nunchuk::jade::JadeError> &
     return result;
 }
 
-jobject toCustomPinServer(
-        JNIEnv *env,
-        const std::optional<nunchuk::jade::CustomPinServerInfo> &server) {
-    if (!server.has_value()) {
-        return nullptr;
-    }
-    auto server_class = env->FindClass("com/nunchuk/android/jade/JadeCustomPinServerInfo");
-    auto constructor = env->GetMethodID(
-            server_class,
-            "<init>",
-            "(Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)V");
-    auto urls = toStringList(env, server->urls);
-    auto method = env->NewStringUTF(server->method.c_str());
-    auto host = env->NewStringUTF(server->host.c_str());
-    auto result = env->NewObject(server_class, constructor, urls, method, host);
-    env->DeleteLocalRef(host);
-    env->DeleteLocalRef(method);
-    env->DeleteLocalRef(urls);
-    env->DeleteLocalRef(server_class);
-    return result;
-}
-
 jobject toJadeStep(JNIEnv *env, const nunchuk::jade::JadeStep &step) {
     auto step_class = env->FindClass("com/nunchuk/android/jade/JadeStep");
     auto constructor = env->GetMethodID(
             step_class,
             "<init>",
-            "(Lcom/nunchuk/android/jade/JadeStepType;Lcom/nunchuk/android/jade/JadeUserInteraction;Ljava/util/List;Lcom/nunchuk/android/jade/JadeCustomPinServerInfo;Lcom/nunchuk/android/jade/JadeError;)V");
+            "(Lcom/nunchuk/android/jade/JadeStepType;Lcom/nunchuk/android/jade/JadeUserInteraction;Ljava/util/List;Lcom/nunchuk/android/jade/JadeError;)V");
     auto type = enumValue(
             env,
             "com/nunchuk/android/jade/JadeStepType",
@@ -208,7 +168,6 @@ jobject toJadeStep(JNIEnv *env, const nunchuk::jade::JadeStep &step) {
             "com/nunchuk/android/jade/JadeUserInteraction",
             interactionOrdinal(step.interaction));
     auto writes = toWriteList(env, step.writes);
-    auto custom_server = toCustomPinServer(env, step.custom_server);
     auto error = toJadeError(env, step.error);
     auto result = env->NewObject(
             step_class,
@@ -216,10 +175,8 @@ jobject toJadeStep(JNIEnv *env, const nunchuk::jade::JadeStep &step) {
             type,
             interaction,
             writes,
-            custom_server,
             error);
     if (error) env->DeleteLocalRef(error);
-    if (custom_server) env->DeleteLocalRef(custom_server);
     env->DeleteLocalRef(writes);
     env->DeleteLocalRef(interaction);
     env->DeleteLocalRef(type);
@@ -342,22 +299,6 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_jadeCreateSession(
                 toString(env, session_id),
                 static_cast<size_t>(max_write_size));
         return toJadeStep(env, session.initialize());
-    } catch (const std::exception &e) {
-        Deserializer::convertStdException2JException(env, e);
-        return nullptr;
-    }
-}
-
-extern "C"
-JNIEXPORT jobject JNICALL
-Java_com_nunchuk_android_nativelib_LibNunchukAndroid_jadeConfirmCustomPinServer(
-        JNIEnv *env,
-        jobject thiz,
-        jstring session_id,
-        jboolean accepted) {
-    try {
-        auto &session = manager().forSession(toString(env, session_id));
-        return toJadeStep(env, session.confirmCustomPinServer(accepted == JNI_TRUE));
     } catch (const std::exception &e) {
         Deserializer::convertStdException2JException(env, e);
         return nullptr;

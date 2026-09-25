@@ -3,7 +3,6 @@ package com.nunchuk.android.jade
 enum class JadeStepType {
     WRITE,
     READ_MORE,
-    CUSTOM_SERVER_APPROVAL,
     COMPLETE,
     FAILED,
 }
@@ -16,7 +15,6 @@ enum class JadeUserInteraction {
     REGISTER_WALLET,
     SIGN_MESSAGE,
     SIGN_TRANSACTION,
-    APPROVE_PINSERVER,
 }
 
 data class JadeError(
@@ -26,17 +24,10 @@ data class JadeError(
     val deviceData: String,
 )
 
-data class JadeCustomPinServerInfo(
-    val urls: List<String>,
-    val method: String,
-    val host: String,
-)
-
 data class JadeStep(
     val type: JadeStepType,
     val interaction: JadeUserInteraction = JadeUserInteraction.NONE,
     val writes: List<ByteArray> = emptyList(),
-    val customServer: JadeCustomPinServerInfo? = null,
     val error: JadeError? = null,
 )
 
