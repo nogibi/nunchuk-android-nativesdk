@@ -91,6 +91,7 @@ internal class LibNunchukAndroid {
     external fun satochipCacheMasterSignerXpubs(card: SatochipCard, masterSignerId: String)
     external fun satochipGetSigner(card: SatochipCard, masterSignerId: String, path: String): SingleSigner
     external fun satochipImportSeed(card: SatochipCard, mnemonic: ByteArray, passphrase: ByteArray)
+    external fun satochipSignMessage(card: SatochipCard, signer: SingleSigner, message: ByteArray): String
     external fun satochipSignPsbt(card: SatochipCard, wallet: WalletBridge, psbt: String): String
     external fun satochipSignPsbtContent(card: SatochipCard, walletContent: String, walletName: String, psbt: String): String
 

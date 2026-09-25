@@ -274,6 +274,20 @@ Java_com_nunchuk_android_nativelib_LibNunchukAndroid_satochipImportSeed(JNIEnv *
 }
 
 extern "C" JNIEXPORT jstring JNICALL
+Java_com_nunchuk_android_nativelib_LibNunchukAndroid_satochipSignMessage(
+    JNIEnv *env, jobject, jobject card, jobject signer, jbyteArray message) {
+    return invoke(env, [&] {
+        Card c(env, card);
+        auto params = c.params();
+        auto text = bytes(env, message);
+        auto result = sdk().SignSatochipMessage(
+            params.cardBip32GetExtendedKeyFn, params.cardSignTransactionHashFn,
+            Serializer::convert2CSigner(env, signer), std::string(text.begin(), text.end()));
+        return env->NewStringUTF(result.c_str());
+    });
+}
+
+extern "C" JNIEXPORT jstring JNICALL
 Java_com_nunchuk_android_nativelib_LibNunchukAndroid_satochipSignPsbt(JNIEnv *env, jobject,
                                                                       jobject card, jobject wallet,
                                                                       jstring psbt) {

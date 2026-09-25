@@ -36,6 +36,9 @@ class SatochipNativeClient {
         }
     }
 
+    fun signMessage(card: SatochipCard, signer: SingleSigner, message: String): String =
+        native.satochipSignMessage(card, signer, message.toByteArray(Charsets.UTF_8))
+
     fun signPsbt(card: SatochipCard, wallet: Wallet, psbt: String): String =
         native.satochipSignPsbt(card, wallet.toBridge(), psbt)
 

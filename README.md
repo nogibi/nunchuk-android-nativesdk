@@ -91,6 +91,9 @@ PIN-authenticated card session. The adapter must throw on APDU/transport errors;
 - `getSigner` returns a cached xpub or reads and saves a custom-path xpub.
 - `cacheMasterSignerXpubs` refills the registered signer's cache.
 - `importSeed` applies UTF-8 NFKD normalization before libnunchuk derives the BIP39 seed.
+- `signMessage` accepts a `SingleSigner` and message text and returns a Base64
+  compact signature. It uses the existing ECDSA callback and preserves UTF-8
+  message bytes, including non-BMP characters.
 - `signPsbt` accepts a `Wallet` or BSMS/descriptor content. Libnunchuk persists and
   atomically consumes the card-encrypted MuSig2 nonces.
 
