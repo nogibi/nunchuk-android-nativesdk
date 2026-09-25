@@ -126,6 +126,7 @@ class Card {
 
     nunchuk::SatochipSignPsbtParams params() {
         nunchuk::SatochipSignPsbtParams p;
+        p.progress = progress();
         p.cardBip32GetExtendedKeyFn = key();
         p.cardSignTransactionHashFn = [this](unsigned char key, const Bytes &hash,
                                              const std::optional<Bytes> &) {
