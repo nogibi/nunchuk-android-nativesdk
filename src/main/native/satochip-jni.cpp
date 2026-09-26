@@ -128,8 +128,7 @@ class Card {
         nunchuk::SatochipSignPsbtParams p;
         p.progress = progress();
         p.cardBip32GetExtendedKeyFn = key();
-        p.cardSignTransactionHashFn = [this](unsigned char key, const Bytes &hash,
-                                             const std::optional<Bytes> &) {
+        p.cardSignTransactionHashFn = [this](unsigned char key, const Bytes &hash) {
             LocalFrame frame(env);
             auto id = method("signTransactionHash", "(I[B)[B");
             auto h = array(env, hash);
@@ -143,7 +142,7 @@ class Card {
             return bytes(env, static_cast<jbyteArray>(env->CallObjectMethod(
                                   card, id, key, t, static_cast<jboolean>(bypass))));
         };
-        p.cardSignSchnorrHashFn = [this](const Bytes &hash, const std::optional<Bytes> &) {
+        p.cardSignSchnorrHashFn = [this](const Bytes &hash) {
             LocalFrame frame(env);
             auto id = method("signSchnorrHash", "([B)[B");
             auto h = array(env, hash);
