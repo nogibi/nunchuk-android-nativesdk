@@ -5,6 +5,7 @@
 #include <nunchukmatrix.h>
 #include "utils/bitbox/bitbox_manager.hpp"
 #include "utils/jade/jade.hpp"
+#include "utils/onekey/onekey.hpp"
 
 using namespace nunchuk;
 
@@ -24,6 +25,7 @@ public:
     std::unique_ptr<NunchukMatrix> nuMatrix;
     std::unique_ptr<bitbox::BitBoxManager> bitBoxManager;
     std::unique_ptr<jade::JadeManager> jadeManager;
+    std::unique_ptr<onekey::OneKeyManager> oneKeyManager;
 
     void initNunchuk(
             const AppSettings &settings,

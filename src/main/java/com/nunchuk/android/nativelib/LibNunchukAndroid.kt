@@ -32,6 +32,9 @@ import com.nunchuk.android.bitbox.BitBoxTransport
 import com.nunchuk.android.exception.NCNativeException
 import com.nunchuk.android.jade.JadeDeviceInfo
 import com.nunchuk.android.jade.JadeStep
+import com.nunchuk.android.onekey.OneKeyDeviceInfo
+import com.nunchuk.android.onekey.OneKeyStep
+import com.nunchuk.android.onekey.OneKeyTransport
 import com.nunchuk.android.ledger.LedgerRegisteredWallet
 import com.nunchuk.android.ledger.LedgerRegisteredWalletResult
 import com.nunchuk.android.ledger.LedgerStep
@@ -2285,6 +2288,98 @@ internal class LibNunchukAndroid {
 
     @Throws(NCNativeException::class)
     external fun jadeGetSignPsbtResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyCreateSession(sessionId: String, transport: OneKeyTransport): OneKeyStep
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyGetMasterFingerprint(sessionId: String): OneKeyStep
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyEnterPinOnDevice(sessionId: String): OneKeyStep
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyCancel(sessionId: String): OneKeyStep
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyOnDisconnected(sessionId: String): OneKeyStep
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyGetExtendedPublicKey(
+        sessionId: String,
+        derivationPath: String,
+        checkOnDevice: Boolean,
+    ): OneKeyStep
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyProvidePin(sessionId: String, pin: String): OneKeyStep
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyProvidePassphrase(sessionId: String, passphrase: ByteArray): OneKeyStep
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyEnterPassphraseOnDevice(sessionId: String, attachToPin: Boolean): OneKeyStep
+
+    @Throws(NCNativeException::class)
+    external fun oneKeySignMessage(
+        sessionId: String,
+        derivationPath: String,
+        message: ByteArray,
+    ): OneKeyStep
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyOnData(sessionId: String, data: ByteArray): OneKeyStep
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyGetWalletAddress(
+        sessionId: String,
+        wallet: WalletBridge,
+        addressIndex: Int,
+        checkOnDevice: Boolean,
+        change: Boolean,
+    ): OneKeyStep
+
+    @Throws(NCNativeException::class)
+    external fun oneKeySignPsbt(sessionId: String, wallet: WalletBridge, psbt: String): OneKeyStep
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyGetWalletAddressContent(
+        sessionId: String,
+        walletContent: String,
+        walletName: String,
+        addressIndex: Int,
+        checkOnDevice: Boolean,
+        change: Boolean,
+    ): OneKeyStep
+
+    @Throws(NCNativeException::class)
+    external fun oneKeySignPsbtContent(
+        sessionId: String,
+        walletContent: String,
+        walletName: String,
+        psbt: String,
+    ): OneKeyStep
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyIsInitialized(sessionId: String): Boolean
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyGetDeviceInfo(sessionId: String): OneKeyDeviceInfo
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyGetExtendedPublicKeyResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyGetMasterFingerprintResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyGetWalletAddressResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyGetMessageSignatureResult(sessionId: String): String
+
+    @Throws(NCNativeException::class)
+    external fun oneKeyGetSignPsbtResult(sessionId: String): String
 
     companion object {
         init {

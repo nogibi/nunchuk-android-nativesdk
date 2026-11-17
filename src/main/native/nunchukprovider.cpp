@@ -23,11 +23,13 @@ void NunchukProvider::initNunchuk(
         SendEventFunc send_event_func
 ) {
     // if decoy pin is empty use MakeNunchukForAccount else use MakeNunchukForDecoyPin
+    oneKeyManager.reset();
     jadeManager.reset();
     bitBoxManager.reset();
     nu = decoy_pin.empty() ? MakeNunchukForAccount(settings, pass_phrase, account_id)
                            : MakeNunchukForDecoyPin(settings, decoy_pin);
     bitBoxManager = std::make_unique<bitbox::BitBoxManager>(*nu);
     jadeManager = std::make_unique<jade::JadeManager>(*nu);
+    oneKeyManager = std::make_unique<onekey::OneKeyManager>(*nu);
     nuMatrix = MakeNunchukMatrixForAccount(settings, pass_phrase, account_id, device_id, send_event_func);
 }
