@@ -8,7 +8,7 @@ enum class OneKeyUserInteraction {
     NONE, UNLOCK_DEVICE, ENTER_PIN, ENTER_PASSPHRASE, VERIFY_ADDRESS,
     EXPORT_PUBLIC_KEY, SIGN_MESSAGE, SIGN_TRANSACTION,
 }
-enum class OneKeyModel { UNKNOWN, CLASSIC, CLASSIC1S, PRO, PRO2 }
+enum class OneKeyModel { UNKNOWN, CLASSIC, CLASSIC1S, PRO, PRO2, NEO }
 
 data class OneKeyError(val code: Int, val message: String, val deviceCode: Int)
 
