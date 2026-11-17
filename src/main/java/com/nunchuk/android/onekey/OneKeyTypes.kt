@@ -10,7 +10,12 @@ enum class OneKeyUserInteraction {
 }
 enum class OneKeyModel { UNKNOWN, CLASSIC, CLASSIC1S, PRO, PRO2, NEO }
 
-data class OneKeyError(val code: Int, val message: String, val deviceCode: Int)
+data class OneKeyError(val code: Int, val message: String, val deviceCode: Int) {
+    companion object {
+        // Must match libnunchuk's OneKeyErrorCode; existing numeric codes stay unchanged.
+        const val BLE_UNAVAILABLE_WHILE_USB_CONNECTED = 10
+    }
+}
 
 data class OneKeyStep(
     val type: OneKeyStepType,
