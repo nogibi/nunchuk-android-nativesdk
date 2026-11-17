@@ -2,12 +2,13 @@ package com.nunchuk.android.onekey
 
 // Keep enum order in sync with libnunchuk's utils/onekey/types.hpp.
 enum class OneKeyTransport { USB, BLE }
+enum class OneKeyProtocol { V1, V2 }
 enum class OneKeyStepType { WRITE, READ_MORE, AWAITING_USER, COMPLETE, FAILED }
 enum class OneKeyUserInteraction {
     NONE, UNLOCK_DEVICE, ENTER_PIN, ENTER_PASSPHRASE, VERIFY_ADDRESS,
     EXPORT_PUBLIC_KEY, SIGN_MESSAGE, SIGN_TRANSACTION,
 }
-enum class OneKeyModel { UNKNOWN, CLASSIC, CLASSIC1S, PRO }
+enum class OneKeyModel { UNKNOWN, CLASSIC, CLASSIC1S, PRO, PRO2 }
 
 data class OneKeyError(val code: Int, val message: String, val deviceCode: Int)
 

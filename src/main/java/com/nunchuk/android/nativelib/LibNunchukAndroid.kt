@@ -32,6 +32,7 @@ import com.nunchuk.android.bitbox.BitBoxTransport
 import com.nunchuk.android.exception.NCNativeException
 import com.nunchuk.android.jade.JadeDeviceInfo
 import com.nunchuk.android.jade.JadeStep
+import com.nunchuk.android.onekey.OneKeyProtocol
 import com.nunchuk.android.onekey.OneKeyDeviceInfo
 import com.nunchuk.android.onekey.OneKeyStep
 import com.nunchuk.android.onekey.OneKeyTransport
@@ -2290,7 +2291,11 @@ internal class LibNunchukAndroid {
     external fun jadeGetSignPsbtResult(sessionId: String): String
 
     @Throws(NCNativeException::class)
-    external fun oneKeyCreateSession(sessionId: String, transport: OneKeyTransport): OneKeyStep
+    external fun oneKeyCreateSession(
+        sessionId: String,
+        transport: OneKeyTransport,
+        protocol: OneKeyProtocol,
+    ): OneKeyStep
 
     @Throws(NCNativeException::class)
     external fun oneKeyGetMasterFingerprint(sessionId: String): OneKeyStep

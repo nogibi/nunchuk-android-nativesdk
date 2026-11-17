@@ -14,8 +14,11 @@ class OneKeyNativeClient {
     private val native = LibNunchukAndroid()
 
     @Throws(NCNativeException::class)
-    fun createSession(sessionId: String, transport: OneKeyTransport): OneKeyStep =
-        native.oneKeyCreateSession(sessionId, transport)
+    fun createSession(
+        sessionId: String,
+        transport: OneKeyTransport,
+        protocol: OneKeyProtocol = OneKeyProtocol.V1,
+    ): OneKeyStep = native.oneKeyCreateSession(sessionId, transport, protocol)
 
     @Throws(NCNativeException::class)
     fun getMasterFingerprint(sessionId: String): OneKeyStep =

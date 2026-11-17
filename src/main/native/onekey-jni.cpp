@@ -172,12 +172,17 @@ jobject toOneKeyDeviceInfo(JNIEnv *env, const nunchuk::onekey::OneKeyDeviceInfo 
 extern "C" JNIEXPORT jobject JNICALL
 Java_com_nunchuk_android_nativelib_LibNunchukAndroid_oneKeyCreateSession(JNIEnv *env, jobject thiz,
                                                                          jstring session_id,
-                                                                         jobject transport) {
+                                                                         jobject transport,
+                                                                         jobject protocol) {
     try {
         const auto ordinal = enumOrdinal(env, transport);
         if (ordinal < 0 || ordinal > 1) throw std::invalid_argument("Invalid OneKey transport");
+        const auto protocol_ordinal = enumOrdinal(env, protocol);
+        if (protocol_ordinal < 0 || protocol_ordinal > 1)
+            throw std::invalid_argument("Invalid OneKey protocol");
         auto &session = manager().forSession(
-            toString(env, session_id), static_cast<nunchuk::onekey::OneKeyTransport>(ordinal));
+            toString(env, session_id), static_cast<nunchuk::onekey::OneKeyTransport>(ordinal),
+            static_cast<nunchuk::onekey::OneKeyProtocol>(protocol_ordinal));
         return toOneKeyStep(env, session.initialize());
     } catch (const std::exception &e) {
         Deserializer::convertStdException2JException(env, e);
